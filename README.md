@@ -6,16 +6,13 @@ Distributed Systems 2018-2019, 2nd semester project
 
 ## Authors
 
-Group CXX
-_preencher com identificador de grupo e depois apagar esta linha_
+Group A14
 
-... ... ...
+Francisco Sousa 86416 TheMrKiko
 
-... ... ...
+João Daniel Silva 86445 DannielSilva
 
-... ... ...
-
-_preencher com nome, número e GitHub ID de membro do grupo e depois apagar esta linha_
+João Barata 86450 Jbarata98
 
 For each module, the README file must identify the lead developer and the contributors.
 The leads should be evenly divided among the group members.
@@ -23,7 +20,7 @@ The leads should be evenly divided among the group members.
 
 ### Code identification
 
-In all the source files (including POMs), please replace __CXX__ with your Campus: A (Alameda) or T (Tagus); and your group number with two digits.
+In all the source files (including POMs), please replace __A14__ with your Campus: A (Alameda) or T (Tagus); and your group number with two digits.
 
 This is important for code dependency management 
 i.e. making sure that your code runs using the correct components and not someone else's.
