@@ -45,6 +45,11 @@
 			<artifactId>uddi-naming</artifactId>
 			<version>${version.uddi-naming}</version>
 		</dependency>
+		<dependency>
+        	<groupId>com.forkexec.A14</groupId>
+        	<artifactId>rst-ws-cli</artifactId>
+        	<version>1.0.0-SNAPSHOT</version>
+    	</dependency>
 	</dependencies>
 
 	<build>

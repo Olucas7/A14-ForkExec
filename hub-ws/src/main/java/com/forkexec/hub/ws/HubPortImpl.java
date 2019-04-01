@@ -5,18 +5,17 @@ import java.util.List;
 import javax.jws.WebService;
 
 import com.forkexec.hub.domain.Hub;
+import com.forkexec.rst.ws.cli.RestaurantClient;
+import com.forkexec.rst.ws.cli.RestaurantClientException;
+
+import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINamingException;
+import pt.ulisboa.tecnico.sdis.ws.uddi.UDDIRecord;
 
 /**
  * This class implements the Web Service port type (interface). The annotations
  * below "map" the Java class to the WSDL definitions.
  */
-@WebService(endpointInterface = "com.forkexec.pts.ws.HubPortType",
-            wsdlLocation = "HubService.wsdl",
-            name ="HubWebService",
-            portName = "HubPort",
-            targetNamespace="http://ws.hub.forkexec.com/",
-            serviceName = "HubService"
-)
+@WebService(endpointInterface = "com.forkexec.hub.ws.HubPortType", wsdlLocation = "HubService.wsdl", name = "HubWebService", portName = "HubPort", targetNamespace = "http://ws.hub.forkexec.com/", serviceName = "HubService")
 public class HubPortImpl implements HubPortType {
 
 	/**
@@ -29,59 +28,57 @@ public class HubPortImpl implements HubPortType {
 	public HubPortImpl(HubEndpointManager endpointManager) {
 		this.endpointManager = endpointManager;
 	}
-	
+
 	// Main operations -------------------------------------------------------
-	
+
 	@Override
 	public void activateAccount(String userId) throws InvalidUserIdFault_Exception {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void loadAccount(String userId, int moneyToAdd, String creditCardNumber)
 			throws InvalidCreditCardFault_Exception, InvalidMoneyFault_Exception, InvalidUserIdFault_Exception {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
-	
+
 	@Override
 	public List<Food> searchDeal(String description) throws InvalidTextFault_Exception {
 		// TODO return lowest price menus first
 		return null;
 	}
-	
+
 	@Override
 	public List<Food> searchHungry(String description) throws InvalidTextFault_Exception {
 		// TODO return lowest preparation time first
 		return null;
 	}
 
-	
 	@Override
 	public void addFoodToCart(String userId, FoodId foodId, int foodQuantity)
 			throws InvalidFoodIdFault_Exception, InvalidFoodQuantityFault_Exception, InvalidUserIdFault_Exception {
-		// TODO 
-		
+		// TODO
+
 	}
 
 	@Override
 	public void clearCart(String userId) throws InvalidUserIdFault_Exception {
-		// TODO 
-		
+		// TODO
+
 	}
 
 	@Override
 	public FoodOrder orderCart(String userId)
 			throws EmptyCartFault_Exception, InvalidUserIdFault_Exception, NotEnoughPointsFault_Exception {
-		// TODO 
+		// TODO
 		return null;
 	}
 
 	@Override
 	public int accountBalance(String userId) throws InvalidUserIdFault_Exception {
-	    // TODO
+		// TODO
 		return 0;
 	}
 
@@ -115,6 +112,15 @@ public class HubPortImpl implements HubPortType {
 		StringBuilder builder = new StringBuilder();
 		builder.append("Hello ").append(inputMessage);
 		builder.append(" from ").append(wsName);
+		try {
+			for (UDDIRecord e : endpointManager.getUddiNaming().listRecords("A14_Restaurant%")) {
+				RestaurantClient client = new RestaurantClient(e.getUrl(), e.getOrgName());
+				String msg = client.ctrlPing(inputMessage);
+				builder.append("\nand ").append(msg);
+			}
+		} catch (UDDINamingException | RestaurantClientException er) {
+			builder.append("\nbut ").append(er.toString());
+		}
 		return builder.toString();
 	}
 
@@ -128,36 +134,34 @@ public class HubPortImpl implements HubPortType {
 	public void ctrlInitFood(List<FoodInit> initialFoods) throws InvalidInitFault_Exception {
 		// TODO Auto-generated method stub
 	}
-	
+
 	@Override
 	public void ctrlInitUserPoints(int startPoints) throws InvalidInitFault_Exception {
 		// TODO Auto-generated method stub
-		
+
 	}
-
-
 
 	// View helpers ----------------------------------------------------------
 
 	// /** Helper to convert a domain object to a view. */
 	// private ParkInfo buildParkInfo(Park park) {
-		// ParkInfo info = new ParkInfo();
-		// info.setId(park.getId());
-		// info.setCoords(buildCoordinatesView(park.getCoordinates()));
-		// info.setCapacity(park.getMaxCapacity());
-		// info.setFreeSpaces(park.getFreeDocks());
-		// info.setAvailableCars(park.getAvailableCars());
-		// return info;
+	// ParkInfo info = new ParkInfo();
+	// info.setId(park.getId());
+	// info.setCoords(buildCoordinatesView(park.getCoordinates()));
+	// info.setCapacity(park.getMaxCapacity());
+	// info.setFreeSpaces(park.getFreeDocks());
+	// info.setAvailableCars(park.getAvailableCars());
+	// return info;
 	// }
 
-	
 	// Exception helpers -----------------------------------------------------
 
 	/** Helper to throw a new BadInit exception. */
-//	private void throwBadInit(final String message) throws BadInitFault_Exception {
-//		BadInitFault faultInfo = new BadInitFault();
-//		faultInfo.message = message;
-//		throw new BadInitFault_Exception(message, faultInfo);
-//	}
+	// private void throwBadInit(final String message) throws BadInitFault_Exception
+	// {
+	// BadInitFault faultInfo = new BadInitFault();
+	// faultInfo.message = message;
+	// throw new BadInitFault_Exception(message, faultInfo);
+	// }
 
 }
