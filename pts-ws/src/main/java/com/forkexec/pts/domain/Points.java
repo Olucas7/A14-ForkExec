@@ -46,7 +46,7 @@ public class Points {
         return SingletonHolder.INSTANCE;
     }
 
-	public void registerEmail(String userEmail) throws EmailAlreadyExistsFault_Exception {
+	public synchronized  void registerEmail(String userEmail) throws EmailAlreadyExistsFault_Exception {
         final EmailAlreadyExistsFault faultInfo = new EmailAlreadyExistsFault();
         String message = "Email already exists";
 
@@ -57,12 +57,12 @@ public class Points {
 
 	}
 
-	public int getBalance(String userEmail) {
+	public synchronized int getBalance(String userEmail) {
         AtomicInteger balance = database.get(userEmail);
 		return balance.intValue();
 	}
 
-	public int deltaBalance(String userEmail,int deltaPoints) {
+	public synchronized int deltaBalance(String userEmail,int deltaPoints) {
         return database.get(userEmail).addAndGet(deltaPoints);
 	}
 
