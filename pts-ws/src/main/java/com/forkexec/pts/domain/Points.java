@@ -4,8 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.forkexec.pts.ws.BadInitFault_Exception;
 import com.forkexec.pts.ws.EmailAlreadyExistsFault;
 import com.forkexec.pts.ws.EmailAlreadyExistsFault_Exception;
+import com.forkexec.pts.ws.NotEnoughBalanceFault;
+
 
 
 /**
@@ -62,8 +65,16 @@ public class Points {
 		return balance.intValue();
 	}
 
-	public synchronized int deltaBalance(String userEmail,int deltaPoints) {
+    public synchronized int deltaBalance(String userEmail,int deltaPoints){
         return database.get(userEmail).addAndGet(deltaPoints);
+    }
+    public synchronized void reset() {
+        database.clear(); 
+   }
+
+	public void init(int startPoints) {
+        startPoints = initialBalance.intValue();
 	}
 
 }
+    
