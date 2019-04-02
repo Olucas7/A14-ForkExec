@@ -26,7 +26,7 @@ public class Restaurant {
 
 	private static List<MenuInit> _database = new ArrayList<MenuInit>();
 
-	private static long menuOrderCounter = 0; 
+	private static long _menuOrderCounter = 0; 
 
 	// Singleton -------------------------------------------------------------
 
@@ -45,6 +45,11 @@ public class Restaurant {
 
 	public static synchronized Restaurant getInstance() {
 		return SingletonHolder.INSTANCE;
+	}
+
+	public static synchronized void resetState() {
+		_database = new ArrayList<MenuInit>();
+		_menuOrderCounter = 0;
 	}
 
 	public Menu getMenu(MenuId menuId) throws BadMenuIdFault_Exception {
@@ -93,7 +98,7 @@ public class Restaurant {
 
 		//create menu order
 		MenuOrderId order_id = new MenuOrderId();
-		order_id.setId(String.valueOf(menuOrderCounter+1));
+		order_id.setId(String.valueOf(_menuOrderCounter+1));
 
 		MenuOrder order = new MenuOrder();
 		order.setId(order_id);
