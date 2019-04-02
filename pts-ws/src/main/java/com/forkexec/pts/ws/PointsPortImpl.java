@@ -45,15 +45,17 @@ public class PointsPortImpl implements PointsPortType {
     @Override
     public int addPoints(final String userEmail, final int pointsToAdd)
 	    throws InvalidEmailFault_Exception, InvalidPointsFault_Exception {
-        //TODO
-        return -1;
+        checkEmail(userEmail);
+        return Points.getInstance().deltaBalance(userEmail,pointsToAdd);
+        
     }
 
     @Override
     public int spendPoints(final String userEmail, final int pointsToSpend)
 	    throws InvalidEmailFault_Exception, InvalidPointsFault_Exception, NotEnoughBalanceFault_Exception {
-        //TODO
-        return -1;
+        checkEmail(userEmail);
+        return Points.getInstance().deltaBalance(userEmail,-pointsToSpend);
+
     }
 
     // Control operations ----------------------------------------------------
@@ -92,19 +94,19 @@ public class PointsPortImpl implements PointsPortType {
     // Aux functions --------------------------------------------------------
 
     public void checkEmail(String userEmail) throws InvalidEmailFault_Exception{
-        final InvalidEmailFault faultInfo = new InvalidEmailFault();
+       
         String message_null = "null email address";
         String message_invalid = "Not a valid email address";
 
 
         if (userEmail == null ) 
-            throw new InvalidEmailFault_Exception(message_null, faultInfo);
+            InvalidEmailFault(message_null);
 
         String regex = "^(.+)@(.+)$";
         Pattern pattern = Pattern.compile(regex);
         Matcher mat = pattern.matcher(userEmail);
         if(!mat.matches())
-            throw new InvalidEmailFault_Exception(message_invalid, faultInfo);
+            InvalidEmailFault(message_invalid);
     }
 
 
@@ -116,4 +118,10 @@ public class PointsPortImpl implements PointsPortType {
         faultInfo.message = message;
         throw new BadInitFault_Exception(message, faultInfo);
     }
+    private void InvalidEmailFault(final String message) throws InvalidEmailFault_Exception {
+        final InvalidEmailFault faultInfo = new InvalidEmailFault();
+        faultInfo.message = message;
+        throw new InvalidEmailFault_Exception(message, faultInfo);
+    }
+   
 }

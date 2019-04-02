@@ -59,9 +59,11 @@ public class Points {
 
 	public int getBalance(String userEmail) {
         AtomicInteger balance = database.get(userEmail);
-		return balance.intValue() ;
+		return balance.intValue();
 	}
 
+	public int deltaBalance(String userEmail,int deltaPoints) {
+        return database.get(userEmail).addAndGet(deltaPoints);
+	}
 
-    //TODO
 }
