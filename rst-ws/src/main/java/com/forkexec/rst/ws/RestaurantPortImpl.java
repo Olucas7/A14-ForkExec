@@ -61,7 +61,7 @@ public class RestaurantPortImpl implements RestaurantPortType {
         String message_invalid = "description with whitespaces";
 
 
-        if (descriptionString == null ) 
+        if (descriptionString == null || descriptionString.trim().length() == 0) 
             throwBadText(message_null);
 
         String regex = "\\s";
