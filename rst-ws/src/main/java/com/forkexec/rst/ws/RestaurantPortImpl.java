@@ -1,6 +1,8 @@
 package com.forkexec.rst.ws;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.jws.WebService;
 
@@ -34,24 +36,40 @@ public class RestaurantPortImpl implements RestaurantPortType {
 	
 	@Override
 	public Menu getMenu(MenuId menuId) throws BadMenuIdFault_Exception {
-		// TODO Auto-generated method stub
-		return null;
+		return Restaurant.getInstance().getMenu(menuId);
+		//checkar string do menuid?
 	}
 	
 	@Override
 	public List<Menu> searchMenus(String descriptionText) throws BadTextFault_Exception {
-		// TODO Auto-generated method stub
-		return null;
+		checkMenuDescription(descriptionText);
+		return Restaurant.getInstance().searchMenus(descriptionText);
 	}
 
 	@Override
 	public MenuOrder orderMenu(MenuId arg0, int arg1)
 			throws BadMenuIdFault_Exception, BadQuantityFault_Exception, InsufficientQuantityFault_Exception {
-		// TODO Auto-generated method stub
-		return null;
+		if (arg1 < 1) {
+			throw new BadQuantityFault_Exception("bad quantity", new BadQuantityFault());
+		}
+		
+		return Restaurant.getInstance().orderMenu(arg0, arg1);
 	}
 
-	
+	public void checkMenuDescription(String descriptionString) throws BadTextFault_Exception {
+        String message_null = "null description";
+        String message_invalid = "description with whitespaces";
+
+
+        if (descriptionString == null || descriptionString.trim().length() == 0) 
+            throwBadText(message_null);
+
+        String regex = "\\s";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher mat = pattern.matcher(descriptionString);
+        if(mat.matches()) //contains white spaces
+            throwBadText(message_invalid);
+	}
 
 	// Control operations ----------------------------------------------------
 
@@ -108,6 +126,10 @@ public class RestaurantPortImpl implements RestaurantPortType {
 		throw new BadInitFault_Exception(message, faultInfo);
 	}
 
-
+	private void throwBadText(final String message) throws BadTextFault_Exception {
+		BadTextFault faultInfo = new BadTextFault();
+		faultInfo.message = message;
+		throw new BadTextFault_Exception(message, faultInfo);
+	}
 
 }
