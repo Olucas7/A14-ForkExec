@@ -1,6 +1,11 @@
 package com.forkexec.pts.ws;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.jws.WebService;
+
+import com.forkexec.pts.domain.Points;
 
 /**
  * This class implements the Web Service port type (interface). The annotations
@@ -23,14 +28,18 @@ public class PointsPortImpl implements PointsPortType {
     // Main operations -------------------------------------------------------
 
     @Override
-	public void activateUser(final String userEmail) throws EmailAlreadyExistsFault_Exception, InvalidEmailFault_Exception {
-        //TODO
+	public void activateUser(final String userEmail)throws EmailAlreadyExistsFault_Exception, InvalidEmailFault_Exception{
+        checkEmail(userEmail);
+        Points psingleton = Points.getInstance();
+        psingleton.registerEmail(userEmail);
+        
     }
 
+    
     @Override
     public int pointsBalance(final String userEmail) throws InvalidEmailFault_Exception {
-        //TODO
-      return -1;
+        checkEmail(userEmail);
+        return Points.getInstance().getBalance(userEmail);
     }
 
     @Override
@@ -79,6 +88,25 @@ public class PointsPortImpl implements PointsPortType {
     public void ctrlInit(final int startPoints) throws BadInitFault_Exception {
         //TODO
     }
+
+    // Aux functions --------------------------------------------------------
+
+    public void checkEmail(String userEmail) throws InvalidEmailFault_Exception{
+        final InvalidEmailFault faultInfo = new InvalidEmailFault();
+        String message_null = "null email address";
+        String message_invalid = "Not a valid email address";
+
+
+        if (userEmail == null ) 
+            throw new InvalidEmailFault_Exception(message_null, faultInfo);
+
+        String regex = "^(.+)@(.+)$";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher mat = pattern.matcher(userEmail);
+        if(!mat.matches())
+            throw new InvalidEmailFault_Exception(message_invalid, faultInfo);
+    }
+
 
     // Exception helpers -----------------------------------------------------
 
