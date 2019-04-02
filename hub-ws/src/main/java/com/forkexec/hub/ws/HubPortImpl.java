@@ -4,7 +4,10 @@ import java.util.List;
 
 import javax.jws.WebService;
 
-import com.forkexec.hub.domain.Hub;
+import com.forkexec.pts.ws.EmailAlreadyExistsFault_Exception;
+import com.forkexec.pts.ws.InvalidEmailFault_Exception;
+import com.forkexec.pts.ws.cli.PointsClient;
+import com.forkexec.pts.ws.cli.PointsClientException;
 import com.forkexec.rst.ws.cli.RestaurantClient;
 import com.forkexec.rst.ws.cli.RestaurantClientException;
 
@@ -33,7 +36,16 @@ public class HubPortImpl implements HubPortType {
 
 	@Override
 	public void activateAccount(String userId) throws InvalidUserIdFault_Exception {
-		// TODO Auto-generated method stub
+		try {
+			for (UDDIRecord p : endpointManager.getUddiNaming().listRecords("A14_Points%")) {
+				PointsClient pointsClient = new PointsClient(p.getUrl(), p.getOrgName());
+				pointsClient.activateUser(userId);
+			}
+		} catch (EmailAlreadyExistsFault_Exception | InvalidEmailFault_Exception e) {
+			throwInvalidUserId("Invalid User Id");
+		} catch (UDDINamingException | PointsClientException e) {
+			e.printStackTrace();
+		}
 
 	}
 
@@ -157,11 +169,22 @@ public class HubPortImpl implements HubPortType {
 	// Exception helpers -----------------------------------------------------
 
 	/** Helper to throw a new BadInit exception. */
-	// private void throwBadInit(final String message) throws BadInitFault_Exception
-	// {
-	// BadInitFault faultInfo = new BadInitFault();
-	// faultInfo.message = message;
-	// throw new BadInitFault_Exception(message, faultInfo);
-	// }
+	private void throwBadInitRst(final String message) throws com.forkexec.rts.ws.BadInitFault_Exception {
+		com.forkexec.rst.ws.BadInitFault faultInfo = new com.forkexec.rst.ws.BadInitFault();
+		faultInfo.setMessage(message);
+		throw new com.forkexec.rst.ws.BadInitFault_Exception(message, faultInfo);
+	}
+
+	private void throwBadInitPts(final String message) throws com.forkexec.pts.ws.BadInitFault_Exception {
+		com.forkexec.pts.ws.BadInitFault faultInfo = new com.forkexec.pts.ws.BadInitFault();
+		faultInfo.setMessage(message);
+		throw new com.forkexec.pts.ws.BadInitFault_Exception(message, faultInfo);
+	}
+
+	private void throwInvalidUserId(final String message) throws InvalidUserIdFault_Exception {
+		InvalidUserIdFault faultInfo = new InvalidUserIdFault();
+		faultInfo.setMessage(message);
+		throw new InvalidUserIdFault_Exception(message, faultInfo);
+	}
 
 }

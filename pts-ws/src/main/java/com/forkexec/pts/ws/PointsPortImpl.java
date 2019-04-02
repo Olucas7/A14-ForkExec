@@ -44,16 +44,23 @@ public class PointsPortImpl implements PointsPortType {
 
     @Override
     public int addPoints(final String userEmail, final int pointsToAdd)
-	    throws InvalidEmailFault_Exception, InvalidPointsFault_Exception {
-        //TODO
-        return -1;
+	    throws InvalidEmailFault_Exception, InvalidPointsFault_Exception{
+        checkEmail(userEmail);
+        checkPoints(userEmail,pointsToAdd);
+        return Points.getInstance().deltaBalance(userEmail,pointsToAdd);
+        
     }
 
     @Override
     public int spendPoints(final String userEmail, final int pointsToSpend)
 	    throws InvalidEmailFault_Exception, InvalidPointsFault_Exception, NotEnoughBalanceFault_Exception {
-        //TODO
-        return -1;
+        checkEmail(userEmail);
+        checkPoints(userEmail,pointsToSpend);
+        String message = "Not enough balance";
+        if(Points.getInstance().deltaBalance(userEmail,-pointsToSpend) < 0)
+            NotEnoughBalanceFault(message);
+        return Points.getInstance().deltaBalance(userEmail,-pointsToSpend);
+
     }
 
     // Control operations ----------------------------------------------------
@@ -80,33 +87,41 @@ public class PointsPortImpl implements PointsPortType {
     /** Return all variables to default values. */
     @Override
     public void ctrlClear() {
-        //TODO
+        Points.getInstance().reset();
     }
 
     /** Set variables with specific values. */
     @Override
     public void ctrlInit(final int startPoints) throws BadInitFault_Exception {
-        //TODO
+        if(startPoints < 1)
+            throwBadInit("Bad init value!");
+        Points.getInstance().init(startPoints);
     }
 
     // Aux functions --------------------------------------------------------
 
     public void checkEmail(String userEmail) throws InvalidEmailFault_Exception{
-        final InvalidEmailFault faultInfo = new InvalidEmailFault();
+       
         String message_null = "null email address";
         String message_invalid = "Not a valid email address";
 
 
         if (userEmail == null ) 
-            throw new InvalidEmailFault_Exception(message_null, faultInfo);
+            InvalidEmailFault(message_null);
 
         String regex = "^(.+)@(.+)$";
         Pattern pattern = Pattern.compile(regex);
         Matcher mat = pattern.matcher(userEmail);
         if(!mat.matches())
-            throw new InvalidEmailFault_Exception(message_invalid, faultInfo);
+            InvalidEmailFault(message_invalid);
     }
 
+    public void checkPoints(String userEmail, int points) throws InvalidEmailFault_Exception, InvalidPointsFault_Exception{
+        String message_points = "Not a valid number of points";
+        if(points < 1)
+            InvalidPointsFault(message_points);
+
+    }
 
     // Exception helpers -----------------------------------------------------
 
@@ -116,4 +131,22 @@ public class PointsPortImpl implements PointsPortType {
         faultInfo.message = message;
         throw new BadInitFault_Exception(message, faultInfo);
     }
+    private void InvalidEmailFault(final String message) throws InvalidEmailFault_Exception {
+        final InvalidEmailFault faultInfo = new InvalidEmailFault();
+        faultInfo.message = message;
+        throw new InvalidEmailFault_Exception(message, faultInfo);
+    }
+    private void InvalidPointsFault(final String message) throws InvalidPointsFault_Exception {
+        final InvalidPointsFault faultInfo = new InvalidPointsFault();
+        faultInfo.message = message;
+        throw new InvalidPointsFault_Exception(message, faultInfo);
+    }
+
+    private void NotEnoughBalanceFault(final String message) throws NotEnoughBalanceFault_Exception {
+        final NotEnoughBalanceFault faultInfo = new NotEnoughBalanceFault();
+        faultInfo.message = message;
+        throw new NotEnoughBalanceFault_Exception(message, faultInfo);
+    }
+
+   
 }

@@ -4,8 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.forkexec.pts.ws.BadInitFault_Exception;
 import com.forkexec.pts.ws.EmailAlreadyExistsFault;
 import com.forkexec.pts.ws.EmailAlreadyExistsFault_Exception;
+import com.forkexec.pts.ws.NotEnoughBalanceFault;
+
 
 
 /**
@@ -46,7 +49,7 @@ public class Points {
         return SingletonHolder.INSTANCE;
     }
 
-	public void registerEmail(String userEmail) throws EmailAlreadyExistsFault_Exception {
+	public synchronized  void registerEmail(String userEmail) throws EmailAlreadyExistsFault_Exception {
         final EmailAlreadyExistsFault faultInfo = new EmailAlreadyExistsFault();
         String message = "Email already exists";
 
@@ -57,11 +60,21 @@ public class Points {
 
 	}
 
-	public int getBalance(String userEmail) {
+	public synchronized int getBalance(String userEmail) {
         AtomicInteger balance = database.get(userEmail);
-		return balance.intValue() ;
+		return balance.intValue();
 	}
 
+    public synchronized int deltaBalance(String userEmail,int deltaPoints){
+        return database.get(userEmail).addAndGet(deltaPoints);
+    }
+    public synchronized void reset() {
+        database.clear(); 
+   }
 
-    //TODO
+	public void init(int startPoints) {
+        startPoints = initialBalance.intValue();
+	}
+
 }
+    
