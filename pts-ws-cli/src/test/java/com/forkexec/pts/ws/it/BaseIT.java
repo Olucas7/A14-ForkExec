@@ -3,6 +3,7 @@ package com.forkexec.pts.ws.it;
 import java.io.IOException;
 import java.util.Properties;
 
+import com.forkexec.pts.ws.BadInitFault_Exception;
 import com.forkexec.pts.ws.cli.PointsClient;
 
 import org.junit.AfterClass;
@@ -47,6 +48,7 @@ public class BaseIT {
 	}
 
 	@AfterClass
-	public static void cleanup() {
+	public static void cleanup() throws BadInitFault_Exception {
+		client.ctrlInit(100);
 	}
 }
