@@ -103,5 +103,9 @@ public class Restaurant {
 		Order order = new Order(String.valueOf(_menuOrderCounter+1), arg0, arg1);
 		return order;
 	}
+
+	public synchronized void initCartes(List<Carte> cartes) {
+		_database.addAll(cartes);
+	}
 	
 }

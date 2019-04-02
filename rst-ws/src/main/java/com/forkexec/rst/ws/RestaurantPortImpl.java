@@ -107,7 +107,8 @@ public class RestaurantPortImpl implements RestaurantPortType {
 	/** Set variables with specific values. */
 	@Override
 	public void ctrlInit(List<MenuInit> initialMenus) throws BadInitFault_Exception {
-		// TODO Auto-generated method stub
+		List<Carte> cartes = convertListOfMenuInitToListOfCartes(initialMenus);
+		Restaurant.getInstance().initCartes(cartes);
 	}
 
 	// View helpers ----------------------------------------------------------
@@ -122,6 +123,32 @@ public class RestaurantPortImpl implements RestaurantPortType {
 		// info.setAvailableCars(park.getAvailableCars());
 		// return info;
 	// }
+
+	private List<Carte> convertListOfMenuInitToListOfCartes(List<MenuInit> initialMenus) {
+		List<Carte> cartes = new ArrayList<Carte>();
+		for (MenuInit menu_info:initialMenus) {
+			Carte c = convertMenuInitToCarte(menu_info);
+			cartes.add(c);
+		}
+		return cartes;
+	}
+
+	private Carte convertMenuInitToCarte(MenuInit menu_info) {
+		Carte carte = convertMenuToCarte(menu_info.getMenu());
+		carte.set_quantity(menu_info.getQuantity());
+		return carte;
+	}
+
+	private Carte convertMenuToCarte(Menu menu) {
+		Carte carte = new Carte();
+		carte.set_id(menu.getId().getId());
+		carte.set_entree(menu.getEntree());
+		carte.set_plate(menu.getPlate());
+		carte.set_dessert(menu.getDessert());
+		carte.set_price(menu.getPrice());
+		carte.set_preparationTime(menu.getPreparationTime());
+		return null;
+	}
 
 	private Menu convertCarteToMenu(Carte carte) {
 		Menu m = new Menu();
