@@ -1,11 +1,14 @@
 package com.forkexec.rst.ws;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.jws.WebService;
 
+import com.forkexec.rst.domain.Carte;
+import com.forkexec.rst.domain.Order;
 import com.forkexec.rst.domain.Restaurant;
 
 /**
@@ -36,14 +39,17 @@ public class RestaurantPortImpl implements RestaurantPortType {
 	
 	@Override
 	public Menu getMenu(MenuId menuId) throws BadMenuIdFault_Exception {
-		return Restaurant.getInstance().getMenu(menuId);
+		Carte carte = Restaurant.getInstance().getMenu(menuId.getId());
+		return convertCarteToMenu(carte);
 		//checkar string do menuid?
 	}
-	
+
+
 	@Override
 	public List<Menu> searchMenus(String descriptionText) throws BadTextFault_Exception {
 		checkMenuDescription(descriptionText);
-		return Restaurant.getInstance().searchMenus(descriptionText);
+		List<Carte> cartes = Restaurant.getInstance().searchMenus(descriptionText);
+		return convertListOfCartesToListOfMenus(cartes);
 	}
 
 	@Override
@@ -52,8 +58,8 @@ public class RestaurantPortImpl implements RestaurantPortType {
 		if (arg1 < 1) {
 			throw new BadQuantityFault_Exception("bad quantity", new BadQuantityFault());
 		}
-		
-		return Restaurant.getInstance().orderMenu(arg0, arg1);
+		Order order = Restaurant.getInstance().orderMenu(arg0.getId(), arg1);
+		return convertOrderToMenuOrder(order);
 	}
 
 	public void checkMenuDescription(String descriptionString) throws BadTextFault_Exception {
@@ -95,6 +101,7 @@ public class RestaurantPortImpl implements RestaurantPortType {
 	/** Return all variables to default values. */
 	@Override
 	public void ctrlClear() {
+		Restaurant.getInstance().resetState();
 	}
 
 	/** Set variables with specific values. */
@@ -116,6 +123,41 @@ public class RestaurantPortImpl implements RestaurantPortType {
 		// return info;
 	// }
 
+	private Menu convertCarteToMenu(Carte carte) {
+		Menu m = new Menu();
+		MenuId mid = new MenuId();
+		mid.setId(carte.get_id());
+		m.setId(mid);
+		m.setEntree(carte.get_entree());
+		m.setPlate(carte.get_plate());
+		m.setDessert(carte.get_dessert());
+		m.setPrice(carte.get_price());
+		m.setPreparationTime(carte.get_preparationTime());
+		return m;
+	}
+
+	private List<Menu> convertListOfCartesToListOfMenus(List<Carte> cartes) {
+		List<Menu> menus = new ArrayList<Menu>();
+		for (Carte c : cartes) {
+			menus.add(convertCarteToMenu(c));
+		}
+		return menus;
+	}
+
+	private MenuOrder convertOrderToMenuOrder(Order order) {
+		MenuOrder mo = new MenuOrder();
+		MenuOrderId moid = new MenuOrderId();
+		MenuId mid = new MenuId();
+		
+		moid.setId(order.get_id());
+		mid.setId(order.get_menuId());
+
+		mo.setId(moid);
+		mo.setMenuId(mid);
+		mo.setMenuQuantity(order.get_menuQuantity());
+
+		return mo;
+	}
 	
 	// Exception helpers -----------------------------------------------------
 

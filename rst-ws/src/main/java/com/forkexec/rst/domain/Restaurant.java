@@ -10,11 +10,11 @@ import com.forkexec.rst.ws.BadTextFault;
 import com.forkexec.rst.ws.BadTextFault_Exception;
 import com.forkexec.rst.ws.InsufficientQuantityFault;
 import com.forkexec.rst.ws.InsufficientQuantityFault_Exception;
-import com.forkexec.rst.ws.Menu;
+/*import com.forkexec.rst.ws.Menu;
 import com.forkexec.rst.ws.MenuId;
 import com.forkexec.rst.ws.MenuInit;
 import com.forkexec.rst.ws.MenuOrder;
-import com.forkexec.rst.ws.MenuOrderId;
+import com.forkexec.rst.ws.MenuOrderId;*/
 
 /**
  * Restaurant
@@ -24,7 +24,7 @@ import com.forkexec.rst.ws.MenuOrderId;
  */
 public class Restaurant {
 
-	private static List<MenuInit> _database = new ArrayList<MenuInit>();
+	private static List<Carte> _database = new ArrayList<Carte>();
 
 	private static long _menuOrderCounter = 0; 
 
@@ -47,75 +47,61 @@ public class Restaurant {
 		return SingletonHolder.INSTANCE;
 	}
 
-	public static synchronized void resetState() {
-		_database = new ArrayList<MenuInit>();
+	public synchronized void resetState() {
+		_database = new ArrayList<Carte>();
 		_menuOrderCounter = 0;
 	}
 
-	public Menu getMenu(MenuId menuId) throws BadMenuIdFault_Exception {
-		return getMenuInitbyMenuId(menuId).getMenu();
+	public Carte getMenu(String menuId) throws BadMenuIdFault_Exception {
+		for(Carte c: _database) {
+			if (c.get_id().equals(menuId)) {
+				return c;
+			}
+		}
+		throw new BadMenuIdFault_Exception("invalid menu id", new BadMenuIdFault());
 	}
 
-	public List<Menu> searchMenus(String descriptionString) throws BadTextFault_Exception {
-		List<Menu> menus = new ArrayList<Menu>();
-		for(MenuInit menu_info: _database) {
-			Menu m = menu_info.getMenu();
-			String entree = m.getEntree();
-   			String plate = m.getPlate();
-			String dessert = m.getDessert();
+	public List<Carte> searchMenus(String descriptionString) throws BadTextFault_Exception {
+		List<Carte> cartes = new ArrayList<Carte>();
+		for(Carte c: _database) {
+			String entree = c.get_entree();
+   			String plate = c.get_plate();
+			String dessert = c.get_dessert();
 
 			if(entree.contains(descriptionString) ||
 				plate.contains(descriptionString) ||
 				dessert.contains(descriptionString)) {
-					menus.add(m);
+					cartes.add(c);
 				}
 			
 		}
 
-		if (menus.isEmpty()) {
+		if (cartes.isEmpty()) {
 			throw new BadTextFault_Exception("no menus found with given descripton", new BadTextFault());
 		}
 
-		return menus;
+		return cartes;
 	}
 
-	public synchronized MenuOrder orderMenu(MenuId arg0, int arg1)
+	public synchronized Order orderMenu(String arg0, int arg1)
 			throws BadMenuIdFault_Exception, BadQuantityFault_Exception, InsufficientQuantityFault_Exception {
-		MenuInit menu_info = getMenuInitbyMenuId(arg0);
-		int quantity = menu_info.getQuantity();
+		Carte carte = getMenu(arg0);
+		int quantity = carte.get_quantity();
 		
 		if (arg1 > quantity) {
 			throw new InsufficientQuantityFault_Exception("not enoughquantity for oder", new InsufficientQuantityFault());
 		}	
 		
-		int index = _database.indexOf(menu_info);
+		int index = _database.indexOf(carte);
 		
 		//update database
-		MenuInit new_info = new MenuInit();
-		new_info.setMenu(menu_info.getMenu());
-		new_info.setQuantity(quantity-arg1);
-		_database.set(index, new_info);
+		Carte new_carte = new Carte(carte.get_id(), carte.get_entree(), carte.get_plate(), carte.get_dessert(), 
+		carte.get_price(), carte.get_preparationTime(), carte.get_quantity() - arg1);
+		_database.set(index, new_carte);
 
 		//create menu order
-		MenuOrderId order_id = new MenuOrderId();
-		order_id.setId(String.valueOf(_menuOrderCounter+1));
-
-		MenuOrder order = new MenuOrder();
-		order.setId(order_id);
-		order.setMenuId(arg0);
-		order.setMenuQuantity(arg1);
-		
+		Order order = new Order(String.valueOf(_menuOrderCounter+1), arg0, arg1);
 		return order;
-	}
-	
-	private MenuInit getMenuInitbyMenuId(MenuId id) throws BadMenuIdFault_Exception {
-		for(MenuInit menu_info: _database) {
-			Menu m = menu_info.getMenu();
-			if (m.getId().equals(id)) {
-				return menu_info;
-			}
-		}
-		throw new BadMenuIdFault_Exception("invalid menu id", new BadMenuIdFault());
 	}
 	
 }
