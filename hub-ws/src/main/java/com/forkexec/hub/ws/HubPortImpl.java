@@ -92,7 +92,11 @@ public class HubPortImpl implements HubPortType {
 
 	@Override
 	public void clearCart(String userId) throws InvalidUserIdFault_Exception {
-		// TODO
+		try {
+			Hub.getInstance().clearCart(userId);
+		} catch (InvalidUserIdException e) {
+			throwInvalidUserId(e.getMessage());
+		}
 
 	}
 

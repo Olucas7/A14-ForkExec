@@ -62,6 +62,11 @@ public class Hub {
 		carts.get(userId).addToCart(new CartItem(cartItemId, itemQuantity));
 	}
 
+	public void clearCart(String userId) throws InvalidUserIdException {
+		checkUserId(userId);
+		carts.remove(userId);
+	}
+
 	/* ------------------- VERIFICADORES ------------------- */
 	public void checkCartItemId(CartItemId cartItemId) throws InvalidCartItemIdException {
 		if (!cartItemId.checkValid()) {
