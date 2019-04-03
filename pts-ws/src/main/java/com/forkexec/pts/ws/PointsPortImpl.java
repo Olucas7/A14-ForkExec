@@ -1,11 +1,11 @@
 package com.forkexec.pts.ws;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.jws.WebService;
 
 import com.forkexec.pts.domain.Points;
+import com.forkexec.pts.domain.Exceptions.*;
 
 /**
  * This class implements the Web Service port type (interface). The annotations
@@ -29,10 +29,13 @@ public class PointsPortImpl implements PointsPortType {
 
     @Override
 	public void activateUser(final String userEmail)throws EmailAlreadyExistsFault_Exception, InvalidEmailFault_Exception{
-        checkEmail(userEmail);
-        Points psingleton = Points.getInstance();
-        psingleton.registerEmail(userEmail);
-        
+        try{ 
+            checkEmail(userEmail);
+            Points psingleton = Points.getInstance();
+            psingleton.registerEmail(userEmail);
+        } catch(EmailAlreadyExistsException e){
+            throw new EmailAlreadyExistsFault_Exception("Email already exists", new EmailAlreadyExistsFault());
+        }   
     }
 
     
@@ -45,22 +48,29 @@ public class PointsPortImpl implements PointsPortType {
     @Override
     public int addPoints(final String userEmail, final int pointsToAdd)
 	    throws InvalidEmailFault_Exception, InvalidPointsFault_Exception{
-        checkEmail(userEmail);
-        checkPoints(userEmail,pointsToAdd);
-        return Points.getInstance().deltaBalance(userEmail,pointsToAdd);
+        try{
+            checkEmail(userEmail);
+            checkPoints(userEmail,pointsToAdd);
+            return Points.getInstance().deltaBalance(userEmail,pointsToAdd);
+            }catch(NotEnoughBalanceException e ){
+        }
+        return 0;
+        }
         
-    }
+            
+    
 
     @Override
     public int spendPoints(final String userEmail, final int pointsToSpend)
 	    throws InvalidEmailFault_Exception, InvalidPointsFault_Exception, NotEnoughBalanceFault_Exception {
+        try{
         checkEmail(userEmail);
         checkPoints(userEmail,pointsToSpend);
-        String message = "Not enough balance";
-        if(Points.getInstance().deltaBalance(userEmail,-pointsToSpend) < 0)
-            NotEnoughBalanceFault(message);
         return Points.getInstance().deltaBalance(userEmail,-pointsToSpend);
-
+        }catch(NotEnoughBalanceException e){
+            NotEnoughBalanceFault("Not enough balance");
+        }
+        return 0;
     }
 
     // Control operations ----------------------------------------------------
