@@ -12,8 +12,13 @@ import org.junit.Test;
  */
 public class ActivateUserIT extends BaseIT {
 
-	final String VALID_EMAIL = "joao.barata@tecnico.pt";
-	final String INVALID_EMAIL_1 = "tecnico";
+	private final String NO_AT_EMAIL = null;
+	private final String VALID_EMAIL = "joao.barata@tecnico.pt";
+	private final String NULL_EMAIL = null;
+	private final String EMPTY_EMAIL = "";
+	private final String NO_USER_EMAIL = "@tecnico.pt";
+	private final String NO_DOMAIN_EMAIL = "velhinho@";
+	private final String NO_USER_DOMAIN_EMAIL = "@";
 
 	@Test
 	public void success() throws EmailAlreadyExistsFault_Exception, InvalidEmailFault_Exception {
@@ -22,7 +27,32 @@ public class ActivateUserIT extends BaseIT {
 	}
 
 	@Test(expected = InvalidEmailFault_Exception.class)
-	public void invalidOneEmailTest() throws InvalidEmailFault_Exception, EmailAlreadyExistsFault_Exception {
-		client.activateUser(INVALID_EMAIL_1);
+	public void nullEmailTest() throws InvalidEmailFault_Exception, EmailAlreadyExistsFault_Exception {
+		client.activateUser(NULL_EMAIL);
+	}
+
+	@Test(expected = InvalidEmailFault_Exception.class)
+	public void emptyEmailTest() throws InvalidEmailFault_Exception, EmailAlreadyExistsFault_Exception {
+		client.activateUser(EMPTY_EMAIL);
+	}
+
+	@Test(expected = InvalidEmailFault_Exception.class)
+	public void noUserEmailTest() throws InvalidEmailFault_Exception, EmailAlreadyExistsFault_Exception {
+		client.activateUser(NO_USER_EMAIL);
+	}
+
+	@Test(expected = InvalidEmailFault_Exception.class)
+	public void noDomainEmailTest() throws InvalidEmailFault_Exception, EmailAlreadyExistsFault_Exception {
+		client.activateUser(NO_DOMAIN_EMAIL);
+	}
+
+	@Test(expected = InvalidEmailFault_Exception.class)
+	public void noUserNorDomainEmailTest() throws InvalidEmailFault_Exception, EmailAlreadyExistsFault_Exception {
+		client.activateUser(NO_USER_DOMAIN_EMAIL);
+	}
+
+	@Test(expected = InvalidEmailFault_Exception.class)
+	public void noAtEmailTest() throws InvalidEmailFault_Exception, EmailAlreadyExistsFault_Exception {
+		client.activateUser(NO_AT_EMAIL);
 	}
 }
