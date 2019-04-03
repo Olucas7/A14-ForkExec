@@ -21,16 +21,15 @@ public class PointsBalanceIT extends BaseIT {
 	private final int STARTPOINTS = 500;
 
 	@Test
-	public void success() throws EmailAlreadyExistsFault_Exception, InvalidEmailFault_Exception {
-		try {
-			client.ctrlInit(STARTPOINTS);
-		} catch (BadInitFault_Exception e) {
-			fail();
-		}
+	public void success() throws EmailAlreadyExistsFault_Exception, InvalidEmailFault_Exception, BadInitFault_Exception {
+		
+		client.ctrlInit(STARTPOINTS);
+		
 		client.activateUser(VALID_EMAIL);
 		assertEquals(STARTPOINTS, client.pointsBalance(VALID_EMAIL));
 	}
 
+	// Testing emails -------------------------------------------------------------------------
 	@Test(expected = InvalidEmailFault_Exception.class)
 	public void nullEmailTest() throws InvalidEmailFault_Exception {
 		client.pointsBalance(NULL_EMAIL);

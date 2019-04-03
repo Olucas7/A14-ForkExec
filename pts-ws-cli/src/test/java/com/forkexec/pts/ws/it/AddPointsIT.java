@@ -1,11 +1,9 @@
 package com.forkexec.pts.ws.it;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 import com.forkexec.pts.ws.BadInitFault_Exception;
 import com.forkexec.pts.ws.EmailAlreadyExistsFault_Exception;
-import com.forkexec.pts.ws.InvalidEmailFault_Exception;
 import com.forkexec.pts.ws.InvalidEmailFault_Exception;
 import com.forkexec.pts.ws.InvalidPointsFault_Exception;
 
@@ -23,22 +21,18 @@ public class AddPointsIT extends BaseIT {
     private final int POINTS_TO_ADD = 1200;
 
     public void success()
-            throws InvalidEmailFault_Exception, InvalidEmailFault_Exception, EmailAlreadyExistsFault_Exception {
-        try {
-            client.ctrlInit(STARTPOINTS);
-        } catch (BadInitFault_Exception e) {
-            fail();
-        }
+            throws InvalidEmailFault_Exception, InvalidEmailFault_Exception, EmailAlreadyExistsFault_Exception,
+            BadInitFault_Exception, InvalidPointsFault_Exception {
+        
+        client.ctrlInit(STARTPOINTS);
+        
         client.activateUser(VALID_EMAIL);
         assertEquals(STARTPOINTS, client.pointsBalance(VALID_EMAIL));
-        try {
-            client.addPoints(VALID_EMAIL, POINTS_TO_ADD);
-        } catch (InvalidPointsFault_Exception e) {
-            fail();
-        }
+        
+        client.addPoints(VALID_EMAIL, POINTS_TO_ADD);
         assertEquals(STARTPOINTS + POINTS_TO_ADD, client.pointsBalance(VALID_EMAIL));
     }
-    
+    // Testing points -------------------------------------------------------------------------
     @Test(expected = InvalidPointsFault_Exception.class)
 	public void add0Points() throws InvalidPointsFault_Exception, InvalidEmailFault_Exception {
 		client.addPoints(VALID_EMAIL, 0);
@@ -49,6 +43,7 @@ public class AddPointsIT extends BaseIT {
 		client.addPoints(VALID_EMAIL, -1);
     }
     
+    // Testing emails -------------------------------------------------------------------------
     @Test(expected = InvalidEmailFault_Exception.class)
 	public void nullEmailTest() throws InvalidPointsFault_Exception, InvalidEmailFault_Exception {
 		client.addPoints(NULL_EMAIL, POINTS_TO_ADD);

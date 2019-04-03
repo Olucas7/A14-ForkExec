@@ -1,7 +1,6 @@
 package com.forkexec.pts.ws.it;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 import com.forkexec.pts.ws.BadInitFault_Exception;
 import com.forkexec.pts.ws.EmailAlreadyExistsFault_Exception;
@@ -24,16 +23,14 @@ public class ActivateUserIT extends BaseIT {
 	private final int STARTPOINTS = 500;
 
 	@Test
-	public void success() throws EmailAlreadyExistsFault_Exception, InvalidEmailFault_Exception {
-		try {
-			client.ctrlInit(STARTPOINTS);
-		} catch (BadInitFault_Exception e) {
-			fail();
-		}
+	public void success() throws EmailAlreadyExistsFault_Exception, InvalidEmailFault_Exception, BadInitFault_Exception {
+		client.ctrlInit(STARTPOINTS);
+
 		client.activateUser(VALID_EMAIL);
 		assertEquals(STARTPOINTS, client.pointsBalance(VALID_EMAIL));
 	}
 
+	// Testing emails -------------------------------------------------------------------------
 	@Test(expected = EmailAlreadyExistsFault_Exception.class)
 	public void alreadyExistsEmailTest() throws InvalidEmailFault_Exception, EmailAlreadyExistsFault_Exception {
 		client.activateUser(VALID_EMAIL);
