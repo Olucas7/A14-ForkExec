@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.forkexec.pts.domain.Exceptions.EmailAlreadyExistsException;
+import com.forkexec.pts.domain.Exceptions.InvalidEmailException;
 import com.forkexec.pts.domain.Exceptions.NotEnoughBalanceException;
 
 /**
@@ -54,17 +55,23 @@ public class Points {
         database.put(userEmail, initialBalance);
 	}
 
-	public synchronized int getBalance(String userEmail) {
+	public synchronized int getBalance(String userEmail) throws InvalidEmailException{
+
+        if(!(database.containsKey(userEmail)))
+            throw new InvalidEmailException("Email doesn't exist");
         AtomicInteger balance = database.get(userEmail);
 		return balance.intValue();
 	}
 
-    public synchronized int deltaBalance(String userEmail,int deltaPoints) throws NotEnoughBalanceException{
+    public synchronized int deltaBalance(String userEmail,int deltaPoints) throws NotEnoughBalanceException, InvalidEmailException{
         String message = "Not enough balance";
+        if(!(database.containsKey(userEmail)))
+            throw new InvalidEmailException("Email doesn't exist");
         if(database.get(userEmail).addAndGet(deltaPoints) < 0)
             throw new NotEnoughBalanceException(message);
         return database.get(userEmail).addAndGet(deltaPoints);
     }
+
     public synchronized void reset() {
         database.clear(); 
         initialBalance.set(DEFAULT_INITIAL_BALANCE);

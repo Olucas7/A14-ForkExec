@@ -1,4 +1,5 @@
 package com.forkexec.pts.ws;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,27 +23,32 @@ public class PointsPortImpl implements PointsPortType {
 
     /** Constructor receives a reference to the endpoint manager. */
     public PointsPortImpl(final PointsEndpointManager endpointManager) {
-	this.endpointManager = endpointManager;
+        this.endpointManager = endpointManager;
     }
 
     // Main operations -------------------------------------------------------
 
     @Override
-	public void activateUser(final String userEmail)throws EmailAlreadyExistsFault_Exception, InvalidEmailFault_Exception{
-        try{ 
+    public void activateUser(final String userEmail)
+            throws EmailAlreadyExistsFault_Exception, InvalidEmailFault_Exception {
+        try {
             checkEmail(userEmail);
             Points psingleton = Points.getInstance();
             psingleton.registerEmail(userEmail);
-        } catch(EmailAlreadyExistsException e){
+        } catch (EmailAlreadyExistsException e) {
             throw new EmailAlreadyExistsFault_Exception("Email already exists", new EmailAlreadyExistsFault());
-        }   
+        }
     }
 
-    
     @Override
     public int pointsBalance(final String userEmail) throws InvalidEmailFault_Exception {
         checkEmail(userEmail);
-        return Points.getInstance().getBalance(userEmail);
+        try {
+            return Points.getInstance().getBalance(userEmail);
+        } catch (InvalidEmailException e) {
+            InvalidEmailFault("email doesn't exist");
+        }
+        return 0;
     }
 
     @Override
@@ -52,29 +58,33 @@ public class PointsPortImpl implements PointsPortType {
             checkEmail(userEmail);
             checkPoints(userEmail,pointsToAdd);
             return Points.getInstance().deltaBalance(userEmail,pointsToAdd);
+
             }catch(NotEnoughBalanceException e ){
-        }
+            }   
+            catch(InvalidEmailException e){
+                InvalidEmailFault("email doesn't exist");
+            }
         return 0;
         }
         
             
-    
-
     @Override
     public int spendPoints(final String userEmail, final int pointsToSpend)
 	    throws InvalidEmailFault_Exception, InvalidPointsFault_Exception, NotEnoughBalanceFault_Exception {
         try{
         checkEmail(userEmail);
-        checkPoints(userEmail,pointsToSpend);
+        checkPoints(pointsToSpend);
         return Points.getInstance().deltaBalance(userEmail,-pointsToSpend);
         }catch(NotEnoughBalanceException e){
             NotEnoughBalanceFault("Not enough balance");
+        }
+        catch(InvalidEmailException e){
+            InvalidEmailFault("email doesn't exist");
         }
         return 0;
     }
 
     // Control operations ----------------------------------------------------
-    // TODO
     /** Diagnostic operation to check if service is running. */
     @Override
     public String ctrlPing(String inputMessage) {
@@ -126,7 +136,7 @@ public class PointsPortImpl implements PointsPortType {
             InvalidEmailFault(message_invalid);
     }
 
-    public void checkPoints(String userEmail, int points) throws InvalidEmailFault_Exception, InvalidPointsFault_Exception{
+    public void checkPoints(int points) throws InvalidPointsFault_Exception{
         String message_points = "Not a valid number of points";
         if(points < 1)
             InvalidPointsFault(message_points);
