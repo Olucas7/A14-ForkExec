@@ -6,9 +6,9 @@ public class CartItem { /* Same as Food or almost Menu */
 	private MealId mealId;
 	private int itemQuantity;
 
-	public CartItem(MealId mealId2, int itemQuantity2) {
-		mealId = mealId2;
-		itemQuantity = itemQuantity2;
+	public CartItem(MealId mealId, int itemQuantity) {
+		this.mealId = mealId;
+		this.itemQuantity = itemQuantity;
 	}
 
 	/**

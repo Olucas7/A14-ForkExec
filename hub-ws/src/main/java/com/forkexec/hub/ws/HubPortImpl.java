@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import javax.jws.WebService;
 
+import com.forkexec.hub.domain.Cart;
 import com.forkexec.hub.domain.CartItem;
 import com.forkexec.hub.domain.MealId;
 import com.forkexec.hub.domain.Hub;
@@ -104,7 +105,7 @@ public class HubPortImpl implements HubPortType {
 	@Override
 	public FoodOrder orderCart(String userId)
 			throws EmptyCartFault_Exception, InvalidUserIdFault_Exception, NotEnoughPointsFault_Exception {
-		// TODO
+		// Cart order = Hub.getInstance().orderCart(userId);
 		return null;
 	}
 

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.forkexec.hub.domain.exceptions.EmptyCartException;
 import com.forkexec.hub.domain.exceptions.InvalidCartItemIdException;
 import com.forkexec.hub.domain.exceptions.InvalidUserIdException;
 import com.forkexec.pts.ws.InvalidEmailFault_Exception;
@@ -29,6 +30,8 @@ import pt.ulisboa.tecnico.sdis.ws.uddi.UDDIRecord;
 public class Hub {
 
 	private static Map<String, Cart> carts = new HashMap<String, Cart>();
+
+	private static int cartCount = 0;
 
 	private static UDDINaming uddi;
 
@@ -59,7 +62,7 @@ public class Hub {
 			throws InvalidUserIdException, InvalidCartItemIdException {
 		checkUserId(userId);
 		checkCartItemId(cartItemId);
-		carts.putIfAbsent(userId, new Cart());
+		carts.putIfAbsent(userId, new Cart(cartCount++));
 		carts.get(userId).addToCart(new CartItem(cartItemId, itemQuantity));
 	}
 
@@ -71,6 +74,25 @@ public class Hub {
 	public List<CartItem> cartContents(String userId) throws InvalidUserIdException {
 		checkUserId(userId);
 		return carts.get(userId).getItems();
+	}
+
+	public Cart orderCart(String userId) throws InvalidUserIdException, EmptyCartException {
+		checkUserId(userId);
+		Cart cart = carts.get(userId);
+		if (cart == null || cart.size() == 0) {
+			throw new EmptyCartException();
+		}
+
+		/*
+		 * Passos: ir aos restaurantes calcular o preço total do cart ir ao pontos ve se
+		 * o utilizador tem saldo ir aos restaurantes encomendar as encomendas ir aos
+		 * pontos descontar o saldo
+		 */
+		for (RestaurantClient r : connectToRestaurants()) {
+			// r.orderMenu(meal, quant)
+		}
+
+		return null;
 	}
 
 	/* ------------------- VERIFICADORES ------------------- */
