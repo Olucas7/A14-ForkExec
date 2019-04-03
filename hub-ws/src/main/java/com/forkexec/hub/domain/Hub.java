@@ -11,6 +11,7 @@ import com.forkexec.pts.ws.InvalidEmailFault_Exception;
 import com.forkexec.pts.ws.cli.PointsClient;
 import com.forkexec.pts.ws.cli.PointsClientException;
 import com.forkexec.rst.ws.BadMenuIdFault_Exception;
+import com.forkexec.rst.ws.Menu;
 import com.forkexec.rst.ws.MenuId;
 import com.forkexec.rst.ws.cli.RestaurantClient;
 import com.forkexec.rst.ws.cli.RestaurantClientException;
@@ -67,29 +68,20 @@ public class Hub {
 		carts.remove(userId);
 	}
 
-	public int accountBalance(String userEmail) throws InvalidUserIdException {
-		try {
-			int bal = 0;
-			for (PointsClient p : connectToPoints()) {
-				bal = p.pointsBalance(userEmail);
-			}
-			return bal;
-		} catch (InvalidEmailFault_Exception e) {
-			throw new InvalidUserIdException();
-		}
-
+	/* ------------------- VERIFICADORES ------------------- */
+	private void checkCartItemId(CartItemId cartItemId) throws InvalidCartItemIdException {
+		getMealById(cartItemId);
 	}
 
-	/* ------------------- VERIFICADORES ------------------- */
-	public void checkCartItemId(CartItemId cartItemId) throws InvalidCartItemIdException {
+	public Meal getMealById(CartItemId cartItemId) throws InvalidCartItemIdException {
 		if (!cartItemId.checkValid()) {
 			throw new InvalidCartItemIdException();
 		}
 		try {
 			RestaurantClient r = connectToRestaurant(cartItemId.getRestaurantId());
 			MenuId menuIdd = new MenuId();
-			menuIdd.setId(cartItemId.getMenuId());
-			r.getMenu(menuIdd);
+			menuIdd.setId(cartItemId.getMealId());
+			return buildMeal(r.getMenu(menuIdd));
 		} catch (BadMenuIdFault_Exception e) {
 			throw new InvalidCartItemIdException();
 		}
@@ -97,14 +89,20 @@ public class Hub {
 	}
 
 	private void checkUserId(String userId) throws InvalidUserIdException {
+		getUserBalance(userId);
+	}
+
+	public int getUserBalance(String userId) throws InvalidUserIdException {
 		if (userId == null || userId == "") {
 			throw new InvalidUserIdException();
 		}
 		try {
 
+			int bal = 0;
 			for (PointsClient p : connectToPoints()) {
-				p.pointsBalance(userId);
+				bal = p.pointsBalance(userId);
 			}
+			return bal;
 
 		} catch (InvalidEmailFault_Exception e) {
 			throw new InvalidUserIdException();
@@ -150,6 +148,18 @@ public class Hub {
 		} catch (UDDINamingException | RestaurantClientException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	/** Helper to convert a domain object to a view. */
+	private Meal buildMeal(Menu menu) {
+		Meal meal = new Meal();
+		meal.setId(menu.getId().getId());
+		meal.setEntree(menu.getEntree());
+		meal.setPlate(menu.getPlate());
+		meal.setDessert(menu.getDessert());
+		meal.setPrice(menu.getPrice());
+		meal.setPreparationTime(menu.getPreparationTime());
+		return meal;
 	}
 
 }

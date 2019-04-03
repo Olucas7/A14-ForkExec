@@ -34,7 +34,7 @@ public class CartItem { /* Same as Food or almost Menu */
 		CartItem obj_eq = (CartItem) obj;
 		CartItemId cartItemId_this = cartItemId;
 		CartItemId cartItemId_eq = obj_eq.getCartItemId();
-		return cartItemId_this.getMenuId() == cartItemId_eq.getMenuId()
+		return cartItemId_this.getMealId() == cartItemId_eq.getMealId()
 				&& cartItemId_this.getRestaurantId() == cartItemId_eq.getRestaurantId();
 	}
 }

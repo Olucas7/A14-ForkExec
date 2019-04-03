@@ -110,7 +110,7 @@ public class HubPortImpl implements HubPortType {
 	@Override
 	public int accountBalance(String userId) throws InvalidUserIdFault_Exception {
 		try {
-			return Hub.getInstance().accountBalance(userId);
+			return Hub.getInstance().getUserBalance(userId);
 		} catch (InvalidUserIdException e) {
 			throwInvalidUserId(e.getMessage());
 		}
@@ -222,7 +222,7 @@ public class HubPortImpl implements HubPortType {
 	private CartItemId buildCartItemId(FoodId id) {
 		CartItemId cid = new CartItemId();
 		cid.setRestaurantId(id.getRestaurantId());
-		cid.setMenuId(id.getMenuId());
+		cid.setMealId(id.getMenuId());
 		return cid;
 	}
 
