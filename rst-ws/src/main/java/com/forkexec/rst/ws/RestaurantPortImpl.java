@@ -71,7 +71,7 @@ public class RestaurantPortImpl implements RestaurantPortType {
 		}
 
 		if (arg1 < 1) {
-			throwBadQuantity("invalid uantity");
+			throwBadQuantity("invalid quantity");
 		}
 
 		try {
