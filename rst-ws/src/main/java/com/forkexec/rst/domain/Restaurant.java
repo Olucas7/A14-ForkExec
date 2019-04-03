@@ -3,18 +3,10 @@ package com.forkexec.rst.domain;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.forkexec.rst.ws.BadMenuIdFault;
-import com.forkexec.rst.ws.BadMenuIdFault_Exception;
-import com.forkexec.rst.ws.BadQuantityFault_Exception;
-import com.forkexec.rst.ws.BadTextFault;
-import com.forkexec.rst.ws.BadTextFault_Exception;
-import com.forkexec.rst.ws.InsufficientQuantityFault;
-import com.forkexec.rst.ws.InsufficientQuantityFault_Exception;
-/*import com.forkexec.rst.ws.Menu;
-import com.forkexec.rst.ws.MenuId;
-import com.forkexec.rst.ws.MenuInit;
-import com.forkexec.rst.ws.MenuOrder;
-import com.forkexec.rst.ws.MenuOrderId;*/
+import com.forkexec.rst.domain.Exceptions.BadMenuIdException;
+import com.forkexec.rst.domain.Exceptions.BadQuantityException;
+import com.forkexec.rst.domain.Exceptions.BadTextException;
+import com.forkexec.rst.domain.Exceptions.InsufficientQuantityException;
 
 /**
  * Restaurant
@@ -52,16 +44,16 @@ public class Restaurant {
 		_menuOrderCounter = 0;
 	}
 
-	public Carte getMenu(String menuId) throws BadMenuIdFault_Exception {
+	public Carte getMenu(String menuId) throws BadMenuIdException {
 		for(Carte c: _database) {
 			if (c.get_id().equals(menuId)) {
 				return c;
 			}
 		}
-		throw new BadMenuIdFault_Exception("invalid menu id", new BadMenuIdFault());
+		throw new BadMenuIdException("invalid menu id");
 	}
 
-	public List<Carte> searchMenus(String descriptionString) throws BadTextFault_Exception {
+	public List<Carte> searchMenus(String descriptionString) throws BadTextException {
 		List<Carte> cartes = new ArrayList<Carte>();
 		for(Carte c: _database) {
 			String entree = c.get_entree();
@@ -77,19 +69,22 @@ public class Restaurant {
 		}
 
 		if (cartes.isEmpty()) {
-			throw new BadTextFault_Exception("no menus found with given descripton", new BadTextFault());
+			throw new BadTextException("no menus found with given descripton");
 		}
 
 		return cartes;
 	}
 
 	public synchronized Order orderMenu(String arg0, int arg1)
-			throws BadMenuIdFault_Exception, BadQuantityFault_Exception, InsufficientQuantityFault_Exception {
+			throws  BadMenuIdException, BadQuantityException, InsufficientQuantityException {
+		if (arg1 < 1) {
+			throw new BadQuantityException("bad quantity");
+		}
 		Carte carte = getMenu(arg0);
 		int quantity = carte.get_quantity();
 		
 		if (arg1 > quantity) {
-			throw new InsufficientQuantityFault_Exception("not enoughquantity for oder", new InsufficientQuantityFault());
+			throw new InsufficientQuantityException("not enoughquantity for oder");
 		}	
 		
 		int index = _database.indexOf(carte);

@@ -10,18 +10,16 @@ import javax.jws.WebService;
 import com.forkexec.rst.domain.Carte;
 import com.forkexec.rst.domain.Order;
 import com.forkexec.rst.domain.Restaurant;
+import com.forkexec.rst.domain.Exceptions.BadMenuIdException;
+import com.forkexec.rst.domain.Exceptions.BadQuantityException;
+import com.forkexec.rst.domain.Exceptions.BadTextException;
+import com.forkexec.rst.domain.Exceptions.InsufficientQuantityException;
 
 /**
  * This class implements the Web Service port type (interface). The annotations
  * below "map" the Java class to the WSDL definitions.
  */
-@WebService(endpointInterface = "com.forkexec.rst.ws.RestaurantPortType",
-            wsdlLocation = "RestaurantService.wsdl",
-            name ="RestaurantWebService",
-            portName = "RestaurantPort",
-            targetNamespace="http://ws.rst.forkexec.com/",
-            serviceName = "RestaurantService"
-)
+@WebService(endpointInterface = "com.forkexec.rst.ws.RestaurantPortType", wsdlLocation = "RestaurantService.wsdl", name = "RestaurantWebService", portName = "RestaurantPort", targetNamespace = "http://ws.rst.forkexec.com/", serviceName = "RestaurantService")
 public class RestaurantPortImpl implements RestaurantPortType {
 
 	/**
@@ -34,32 +32,47 @@ public class RestaurantPortImpl implements RestaurantPortType {
 	public RestaurantPortImpl(RestaurantEndpointManager endpointManager) {
 		this.endpointManager = endpointManager;
 	}
-	
+
 	// Main operations -------------------------------------------------------
-	
+
 	@Override
 	public Menu getMenu(MenuId menuId) throws BadMenuIdFault_Exception {
-		Carte carte = Restaurant.getInstance().getMenu(menuId.getId());
-		return convertCarteToMenu(carte);
-		//checkar string do menuid?
+		Carte carte;
+		try {
+			carte = Restaurant.getInstance().getMenu(menuId.getId());
+			return convertCarteToMenu(carte);
+		} catch (BadMenuIdException e) {
+			throw new BadMenuIdFault_Exception(e.getId(), new BadMenuIdFault());
+		}
+		// checkar string do menuid?
 	}
-
 
 	@Override
 	public List<Menu> searchMenus(String descriptionText) throws BadTextFault_Exception {
 		checkMenuDescription(descriptionText);
-		List<Carte> cartes = Restaurant.getInstance().searchMenus(descriptionText);
-		return convertListOfCartesToListOfMenus(cartes);
+		List<Carte> cartes;
+		try {
+			cartes = Restaurant.getInstance().searchMenus(descriptionText);
+			return convertListOfCartesToListOfMenus(cartes);
+		} catch (BadTextException e) {
+			throw new BadTextFault_Exception(e.getMessage() ,new BadTextFault());
+		}
 	}
 
 	@Override
 	public MenuOrder orderMenu(MenuId arg0, int arg1)
 			throws BadMenuIdFault_Exception, BadQuantityFault_Exception, InsufficientQuantityFault_Exception {
-		if (arg1 < 1) {
-			throw new BadQuantityFault_Exception("bad quantity", new BadQuantityFault());
+		try {
+			Order order;
+			order = Restaurant.getInstance().orderMenu(arg0.getId(), arg1);
+			return convertOrderToMenuOrder(order);
+		} catch (BadMenuIdException e) {
+			throw new BadMenuIdFault_Exception(e.getId(), new BadMenuIdFault());
+		} catch (BadQuantityException e) {
+			throw new BadQuantityFault_Exception(e.getMessage(), new  BadQuantityFault());
+		} catch (InsufficientQuantityException e) {
+			throw new InsufficientQuantityFault_Exception(e.getMessage(), new InsufficientQuantityFault());
 		}
-		Order order = Restaurant.getInstance().orderMenu(arg0.getId(), arg1);
-		return convertOrderToMenuOrder(order);
 	}
 
 	public void checkMenuDescription(String descriptionString) throws BadTextFault_Exception {
