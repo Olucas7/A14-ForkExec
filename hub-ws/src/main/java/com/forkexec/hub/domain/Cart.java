@@ -16,4 +16,18 @@ public class Cart {
 
 	}
 
+	/**
+	 * @return the items
+	 */
+	public List<CartItem> getItems() {
+		return items;
+	}
+
+	/**
+	 * @param items the items to set
+	 */
+	public void setItems(List<CartItem> items) {
+		this.items = items;
+	}
+
 }

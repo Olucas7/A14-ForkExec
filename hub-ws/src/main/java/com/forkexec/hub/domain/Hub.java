@@ -68,6 +68,11 @@ public class Hub {
 		carts.remove(userId);
 	}
 
+	public List<CartItem> cartContents(String userId) throws InvalidUserIdException {
+		checkUserId(userId);
+		return carts.get(userId).getItems();
+	}
+
 	/* ------------------- VERIFICADORES ------------------- */
 	private void checkCartItemId(CartItemId cartItemId) throws InvalidCartItemIdException {
 		getMealById(cartItemId);

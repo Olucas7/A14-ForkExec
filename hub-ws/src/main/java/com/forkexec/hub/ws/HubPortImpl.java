@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import javax.jws.WebService;
 
+import com.forkexec.hub.domain.CartItem;
 import com.forkexec.hub.domain.CartItemId;
 import com.forkexec.hub.domain.Hub;
 import com.forkexec.hub.domain.exceptions.InvalidCartItemIdException;
@@ -125,7 +126,17 @@ public class HubPortImpl implements HubPortType {
 
 	@Override
 	public List<FoodOrderItem> cartContents(String userId) throws InvalidUserIdFault_Exception {
-		// TODO
+		try {
+			List<CartItem> order = Hub.getInstance().cartContents(userId);
+			List<FoodOrderItem> foodorder = new ArrayList<FoodOrderItem>();
+			foodorder.addAll(order.stream().map(cartitem -> {
+				return buildFoodOrderItem(cartitem);
+
+			}).collect(Collectors.toList()));
+			return foodorder;
+		} catch (InvalidUserIdException e) {
+			throwInvalidUserId(e.getMessage());
+		}
 		return null;
 	}
 
@@ -224,6 +235,15 @@ public class HubPortImpl implements HubPortType {
 		cid.setRestaurantId(id.getRestaurantId());
 		cid.setMealId(id.getMenuId());
 		return cid;
+	}
+
+	private FoodOrderItem buildFoodOrderItem(CartItem cartitem) {
+		FoodOrderItem food = new FoodOrderItem();
+		food.setFoodId(new FoodId());
+		food.getFoodId().setMenuId(cartitem.getCartItemId().getMealId());
+		food.getFoodId().setRestaurantId(cartitem.getCartItemId().getRestaurantId());
+		food.setFoodQuantity(cartitem.getItemQuantity());
+		return food;
 	}
 
 	// Exception helpers -----------------------------------------------------
