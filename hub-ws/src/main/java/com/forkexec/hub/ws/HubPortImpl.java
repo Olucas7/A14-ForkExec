@@ -109,7 +109,11 @@ public class HubPortImpl implements HubPortType {
 
 	@Override
 	public int accountBalance(String userId) throws InvalidUserIdFault_Exception {
-		// TODO
+		try {
+			return Hub.getInstance().accountBalance(userId);
+		} catch (InvalidUserIdException e) {
+			throwInvalidUserId(e.getMessage());
+		}
 		return 0;
 	}
 

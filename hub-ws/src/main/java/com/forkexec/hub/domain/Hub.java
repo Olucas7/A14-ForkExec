@@ -67,6 +67,19 @@ public class Hub {
 		carts.remove(userId);
 	}
 
+	public int accountBalance(String userEmail) throws InvalidUserIdException {
+		try {
+			int bal = 0;
+			for (PointsClient p : connectToPoints()) {
+				bal = p.pointsBalance(userEmail);
+			}
+			return bal;
+		} catch (InvalidEmailFault_Exception e) {
+			throw new InvalidUserIdException();
+		}
+
+	}
+
 	/* ------------------- VERIFICADORES ------------------- */
 	public void checkCartItemId(CartItemId cartItemId) throws InvalidCartItemIdException {
 		if (!cartItemId.checkValid()) {
