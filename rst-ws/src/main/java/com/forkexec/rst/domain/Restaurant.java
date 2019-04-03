@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.forkexec.rst.domain.Exceptions.BadMenuIdException;
-import com.forkexec.rst.domain.Exceptions.BadQuantityException;
 import com.forkexec.rst.domain.Exceptions.BadTextException;
 import com.forkexec.rst.domain.Exceptions.InsufficientQuantityException;
 
@@ -50,7 +49,7 @@ public class Restaurant {
 				return c;
 			}
 		}
-		throw new BadMenuIdException("invalid menu id");
+		throw new BadMenuIdException("no menu found with given menuid");
 	}
 
 	public List<Carte> searchMenus(String descriptionString) throws BadTextException {
@@ -76,15 +75,12 @@ public class Restaurant {
 	}
 
 	public synchronized Order orderMenu(String arg0, int arg1)
-			throws  BadMenuIdException, BadQuantityException, InsufficientQuantityException {
-		if (arg1 < 1) {
-			throw new BadQuantityException("bad quantity");
-		}
-		Carte carte = getMenu(arg0);
+			throws  BadMenuIdException, InsufficientQuantityException {
+		Carte carte = getMenu(arg0);  //throws BadMenuIdException
 		int quantity = carte.get_quantity();
 		
 		if (arg1 > quantity) {
-			throw new InsufficientQuantityException("not enoughquantity for oder");
+			throw new InsufficientQuantityException("not enough quantity for order");
 		}	
 		
 		int index = _database.indexOf(carte);

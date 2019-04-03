@@ -11,7 +11,6 @@ import com.forkexec.rst.domain.Carte;
 import com.forkexec.rst.domain.Order;
 import com.forkexec.rst.domain.Restaurant;
 import com.forkexec.rst.domain.Exceptions.BadMenuIdException;
-import com.forkexec.rst.domain.Exceptions.BadQuantityException;
 import com.forkexec.rst.domain.Exceptions.BadTextException;
 import com.forkexec.rst.domain.Exceptions.InsufficientQuantityException;
 
@@ -37,57 +36,76 @@ public class RestaurantPortImpl implements RestaurantPortType {
 
 	@Override
 	public Menu getMenu(MenuId menuId) throws BadMenuIdFault_Exception {
+		if (!validString(menuId.getId())) {
+			throwBadMenuId("invalid menu id");
+		}
 		Carte carte;
 		try {
 			carte = Restaurant.getInstance().getMenu(menuId.getId());
 			return convertCarteToMenu(carte);
 		} catch (BadMenuIdException e) {
-			throw new BadMenuIdFault_Exception(e.getId(), new BadMenuIdFault());
-		}
+			throwBadMenuId(e.getId());
+		} return null;
 		// checkar string do menuid?
 	}
 
 	@Override
 	public List<Menu> searchMenus(String descriptionText) throws BadTextFault_Exception {
-		checkMenuDescription(descriptionText);
+		if(!validString(descriptionText)) {
+			throwBadText("invalid description");
+		}
 		List<Carte> cartes;
 		try {
 			cartes = Restaurant.getInstance().searchMenus(descriptionText);
 			return convertListOfCartesToListOfMenus(cartes);
 		} catch (BadTextException e) {
-			throw new BadTextFault_Exception(e.getMessage() ,new BadTextFault());
-		}
+			throwBadText(e.getMessage());
+		} return null;
 	}
 
 	@Override
 	public MenuOrder orderMenu(MenuId arg0, int arg1)
 			throws BadMenuIdFault_Exception, BadQuantityFault_Exception, InsufficientQuantityFault_Exception {
+		if (!validString(arg0.getId())) {
+			throwBadMenuId("invalid menu id");
+		}
+
+		if (arg1 < 1) {
+			throwBadQuantity("invalid uantity");
+		}
+
 		try {
 			Order order;
 			order = Restaurant.getInstance().orderMenu(arg0.getId(), arg1);
 			return convertOrderToMenuOrder(order);
 		} catch (BadMenuIdException e) {
-			throw new BadMenuIdFault_Exception(e.getId(), new BadMenuIdFault());
-		} catch (BadQuantityException e) {
-			throw new BadQuantityFault_Exception(e.getMessage(), new  BadQuantityFault());
+			throwBadMenuId(e.getId());
 		} catch (InsufficientQuantityException e) {
-			throw new InsufficientQuantityFault_Exception(e.getMessage(), new InsufficientQuantityFault());
-		}
+			throwInsufficientQuantity(e.getMessage());
+		}	return null;
 	}
 
-	public void checkMenuDescription(String descriptionString) throws BadTextFault_Exception {
-        String message_null = "null description";
-        String message_invalid = "description with whitespaces";
+	//Validation operations --------------------------------------------------
 
-
-        if (descriptionString == null || descriptionString.trim().length() == 0) 
-            throwBadText(message_null);
+	public boolean validString(String message) {
+        if (message == null || message.trim().length() == 0) 
+            return false;
 
         String regex = "\\s";
         Pattern pattern = Pattern.compile(regex);
-        Matcher mat = pattern.matcher(descriptionString);
+        Matcher mat = pattern.matcher(message);
         if(mat.matches()) //contains white spaces
-            throwBadText(message_invalid);
+			return false;
+		return true;
+	}
+
+	private boolean isValidMenuInit(MenuInit menu_info) {
+		return menu_info.getQuantity() > 0 && isValidMenu(menu_info.getMenu());
+	}
+
+	private boolean isValidMenu(Menu menu) {
+		return menu.getPrice() > 0 && menu.getPreparationTime() > 0 &&
+		validString(menu.getEntree()) && validString(menu.getPlate()) && validString(menu.getDessert());
 	}
 
 	// Control operations ----------------------------------------------------
@@ -120,6 +138,9 @@ public class RestaurantPortImpl implements RestaurantPortType {
 	/** Set variables with specific values. */
 	@Override
 	public void ctrlInit(List<MenuInit> initialMenus) throws BadInitFault_Exception {
+		if (initialMenus == null || initialMenus.isEmpty()) {
+			throwBadInit("null list of menus to initialize");
+		}
 		List<Carte> cartes = convertListOfMenuInitToListOfCartes(initialMenus);
 		Restaurant.getInstance().initCartes(cartes);
 	}
@@ -137,11 +158,16 @@ public class RestaurantPortImpl implements RestaurantPortType {
 		// return info;
 	// }
 
-	private List<Carte> convertListOfMenuInitToListOfCartes(List<MenuInit> initialMenus) {
+	private List<Carte> convertListOfMenuInitToListOfCartes(List<MenuInit> initialMenus) throws BadInitFault_Exception {
 		List<Carte> cartes = new ArrayList<Carte>();
 		for (MenuInit menu_info:initialMenus) {
-			Carte c = convertMenuInitToCarte(menu_info);
-			cartes.add(c);
+			if (isValidMenuInit(menu_info))  {
+				Carte c = convertMenuInitToCarte(menu_info);
+				cartes.add(c);
+			}
+			else {
+				throwBadInit("invalid menu init");
+			}
 		}
 		return cartes;
 	}
@@ -212,6 +238,24 @@ public class RestaurantPortImpl implements RestaurantPortType {
 		BadTextFault faultInfo = new BadTextFault();
 		faultInfo.message = message;
 		throw new BadTextFault_Exception(message, faultInfo);
+	}
+
+	private void throwBadMenuId(final String message) throws BadMenuIdFault_Exception {
+		BadMenuIdFault faultInfo = new BadMenuIdFault();
+		faultInfo.message = message;
+		throw new BadMenuIdFault_Exception(message, faultInfo);
+	}
+	
+	private void throwBadQuantity(final String message) throws BadQuantityFault_Exception {
+		BadQuantityFault faultInfo = new BadQuantityFault();
+		faultInfo.message = message;
+		throw new BadQuantityFault_Exception(message, faultInfo);
+	}
+
+	private void throwInsufficientQuantity(final String message) throws InsufficientQuantityFault_Exception {
+		InsufficientQuantityFault faultInfo = new InsufficientQuantityFault();
+		faultInfo.message = message;
+		throw new InsufficientQuantityFault_Exception(message, faultInfo);
 	}
 
 }
