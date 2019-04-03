@@ -4,6 +4,8 @@ import java.io.IOException;
 
 import javax.xml.ws.Endpoint;
 
+import com.forkexec.hub.domain.Hub;
+
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
 
 /** The endpoint manager starts and registers the service. */
@@ -129,6 +131,7 @@ public class HubEndpointManager {
 				}
 				uddiNaming = new UDDINaming(uddiURL);
 				uddiNaming.rebind(wsName, wsURL);
+				Hub.setUDDINaming(uddiNaming);
 			}
 		} catch (Exception e) {
 			uddiNaming = null;

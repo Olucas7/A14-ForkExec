@@ -1,5 +1,6 @@
 package com.forkexec.hub.ws;
 
+import java.awt.MenuItem;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -7,6 +8,10 @@ import java.util.stream.Collectors;
 
 import javax.jws.WebService;
 
+import com.forkexec.hub.domain.CartItemId;
+import com.forkexec.hub.domain.Hub;
+import com.forkexec.hub.domain.exceptions.InvalidCartItemIdException;
+import com.forkexec.hub.domain.exceptions.InvalidUserIdException;
 import com.forkexec.pts.ws.EmailAlreadyExistsFault_Exception;
 import com.forkexec.pts.ws.InvalidEmailFault_Exception;
 import com.forkexec.pts.ws.cli.PointsClient;
@@ -74,8 +79,15 @@ public class HubPortImpl implements HubPortType {
 	@Override
 	public void addFoodToCart(String userId, FoodId foodId, int foodQuantity)
 			throws InvalidFoodIdFault_Exception, InvalidFoodQuantityFault_Exception, InvalidUserIdFault_Exception {
-		// TODO
-
+		if (foodQuantity <= 0)
+			throwInvalidFoodQuantity("Invalid Quantity");
+		try {
+			Hub.getInstance().addMenuItemToCart(userId, buildCartItemId(foodId), foodQuantity);
+		} catch (InvalidUserIdException e) {
+			throwInvalidUserId(e.getMessage());
+		} catch (InvalidCartItemIdException e) {
+			throwInvalidFoodId(e.getMessage());
+		}
 	}
 
 	@Override
@@ -177,7 +189,7 @@ public class HubPortImpl implements HubPortType {
 			}
 			return foods;
 		} catch (BadTextFault_Exception e) {
-			throwInvalidText("Invalid foood description");
+			throwInvalidText("Invalid food description");
 		} catch (UDDINamingException | RestaurantClientException e) {
 			e.printStackTrace();
 		}
@@ -197,6 +209,13 @@ public class HubPortImpl implements HubPortType {
 		food.setPrice(menu.getPrice());
 		food.setPreparationTime(menu.getPreparationTime());
 		return food;
+	}
+
+	private CartItemId buildCartItemId(FoodId id) {
+		CartItemId cid = new CartItemId();
+		cid.setRestaurantId(id.getRestaurantId());
+		cid.setMenuId(id.getMenuId());
+		return cid;
 	}
 
 	// Exception helpers -----------------------------------------------------
@@ -224,6 +243,18 @@ public class HubPortImpl implements HubPortType {
 		InvalidTextFault faultInfo = new InvalidTextFault();
 		faultInfo.setMessage(message);
 		throw new InvalidTextFault_Exception(message, faultInfo);
+	}
+
+	private void throwInvalidFoodId(final String message) throws InvalidFoodIdFault_Exception {
+		InvalidFoodIdFault faultInfo = new InvalidFoodIdFault();
+		faultInfo.setMessage(message);
+		throw new InvalidFoodIdFault_Exception(message, faultInfo);
+	}
+
+	private void throwInvalidFoodQuantity(final String message) throws InvalidFoodQuantityFault_Exception {
+		InvalidFoodQuantityFault faultInfo = new InvalidFoodQuantityFault();
+		faultInfo.setMessage(message);
+		throw new InvalidFoodQuantityFault_Exception(message, faultInfo);
 	}
 
 }
