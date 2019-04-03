@@ -7,10 +7,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.forkexec.pts.domain.Exceptions.EmailAlreadyExistsException;
 import com.forkexec.pts.domain.Exceptions.NotEnoughBalanceException;
 
-
-
-
-
 /**
  * Points
  * <p>
@@ -25,20 +21,17 @@ public class Points {
     /**
      * Global with the current value for the initial balance of every new client
      */
-    private AtomicInteger initialBalance = new AtomicInteger(DEFAULT_INITIAL_BALANCE);
+    private final AtomicInteger initialBalance = new AtomicInteger(DEFAULT_INITIAL_BALANCE);
 
     // database for users and points
     private static Map<String,AtomicInteger> database = new HashMap<String,AtomicInteger>();
-
-
 
     // Singleton -------------------------------------------------------------
 
     /**
      * Private constructor prevents instantiation from other classes.
      */
-    private Points() {
-        
+    private Points() {   
     }
 
     /**
@@ -74,15 +67,13 @@ public class Points {
     }
     public synchronized void reset() {
         database.clear(); 
-        this.initialBalance = new AtomicInteger(DEFAULT_INITIAL_BALANCE);
+        initialBalance.set(DEFAULT_INITIAL_BALANCE);
    }
 
 	public synchronized void init(int startPoints) {
-         this.initialBalance= new AtomicInteger(startPoints);
+        initialBalance.set(startPoints);
            
         }
-
-	
 
 }
     
