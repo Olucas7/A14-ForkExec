@@ -4,12 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.forkexec.pts.ws.BadInitFault_Exception;
-import com.forkexec.pts.ws.EmailAlreadyExistsFault;
-import com.forkexec.pts.ws.EmailAlreadyExistsFault_Exception;
-import com.forkexec.pts.ws.NotEnoughBalanceFault;
-
-
+import com.forkexec.pts.domain.Exceptions.EmailAlreadyExistsException;
+import com.forkexec.pts.domain.Exceptions.NotEnoughBalanceException;
 
 /**
  * Points
@@ -35,7 +31,8 @@ public class Points {
     /**
      * Private constructor prevents instantiation from other classes.
      */
-    private Points() { }
+    private Points() {   
+    }
 
     /**
      * SingletonHolder is loaded on the first execution of Singleton.getInstance()
@@ -49,15 +46,12 @@ public class Points {
         return SingletonHolder.INSTANCE;
     }
 
-	public synchronized  void registerEmail(String userEmail) throws EmailAlreadyExistsFault_Exception {
-        final EmailAlreadyExistsFault faultInfo = new EmailAlreadyExistsFault();
+	public synchronized  void registerEmail(String userEmail) throws EmailAlreadyExistsException {
         String message = "Email already exists";
-
         if(database.containsKey(userEmail))
-            throw new EmailAlreadyExistsFault_Exception(message, faultInfo);
+            throw new EmailAlreadyExistsException(message);
 
         database.put(userEmail, initialBalance);
-
 	}
 
 	public synchronized int getBalance(String userEmail) {
@@ -65,16 +59,21 @@ public class Points {
 		return balance.intValue();
 	}
 
-    public synchronized int deltaBalance(String userEmail,int deltaPoints){
+    public synchronized int deltaBalance(String userEmail,int deltaPoints) throws NotEnoughBalanceException{
+        String message = "Not enough balance";
+        if(database.get(userEmail).addAndGet(deltaPoints) < 0)
+            throw new NotEnoughBalanceException(message);
         return database.get(userEmail).addAndGet(deltaPoints);
     }
     public synchronized void reset() {
         database.clear(); 
+        initialBalance.set(DEFAULT_INITIAL_BALANCE);
    }
 
-	public void init(int startPoints) {
-        startPoints = initialBalance.intValue();
-	}
+	public synchronized void init(int startPoints) {
+        initialBalance.set(startPoints);
+           
+        }
 
 }
     
