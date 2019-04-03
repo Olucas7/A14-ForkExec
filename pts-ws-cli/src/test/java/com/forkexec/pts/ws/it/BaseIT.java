@@ -49,6 +49,6 @@ public class BaseIT {
 
 	@AfterClass
 	public static void cleanup() throws BadInitFault_Exception {
-		client.ctrlInit(100);
+		client.ctrlClear();
 	}
 }

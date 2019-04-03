@@ -56,7 +56,7 @@ public class PointsPortImpl implements PointsPortType {
 	    throws InvalidEmailFault_Exception, InvalidPointsFault_Exception{
         try{
             checkEmail(userEmail);
-            checkPoints(userEmail,pointsToAdd);
+            checkPoints(pointsToAdd);
             return Points.getInstance().deltaBalance(userEmail,pointsToAdd);
 
             }catch(NotEnoughBalanceException e ){
