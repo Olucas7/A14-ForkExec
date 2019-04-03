@@ -1,6 +1,9 @@
 package com.forkexec.hub.ws;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.jws.WebService;
 
@@ -8,6 +11,8 @@ import com.forkexec.pts.ws.EmailAlreadyExistsFault_Exception;
 import com.forkexec.pts.ws.InvalidEmailFault_Exception;
 import com.forkexec.pts.ws.cli.PointsClient;
 import com.forkexec.pts.ws.cli.PointsClientException;
+import com.forkexec.rst.ws.BadTextFault_Exception;
+import com.forkexec.rst.ws.Menu;
 import com.forkexec.rst.ws.cli.RestaurantClient;
 import com.forkexec.rst.ws.cli.RestaurantClientException;
 
@@ -58,14 +63,12 @@ public class HubPortImpl implements HubPortType {
 
 	@Override
 	public List<Food> searchDeal(String description) throws InvalidTextFault_Exception {
-		// TODO return lowest price menus first
-		return null;
+		return searches(description, byPrice);
 	}
 
 	@Override
 	public List<Food> searchHungry(String description) throws InvalidTextFault_Exception {
-		// TODO return lowest preparation time first
-		return null;
+		return searches(description, byPrepTime);
 	}
 
 	@Override
@@ -153,23 +156,53 @@ public class HubPortImpl implements HubPortType {
 
 	}
 
+	// Aux function ----------------------------------------------------------
+	Comparator<Food> byPrepTime = Comparator.comparing(Food::getPreparationTime);
+	Comparator<Food> byPrice = Comparator.comparing(Food::getPrice);
+
+	public List<Food> searches(String description, Comparator<Food> comparator) throws InvalidTextFault_Exception {
+		try {
+			List<Food> foods = new ArrayList<Food>();
+			for (UDDIRecord r : endpointManager.getUddiNaming().listRecords("A14_Restaurants%")) {
+				RestaurantClient restaurantClient = new RestaurantClient(r.getUrl(), r.getOrgName());
+
+				foods.addAll(restaurantClient.searchMenus(description).stream().map(menu -> {
+					Food food = buildFood(menu);
+					food.getId().setRestaurantId(r.getOrgName());
+					return food;
+
+				}).collect(Collectors.toList()));
+
+				foods.sort(comparator);
+			}
+			return foods;
+		} catch (BadTextFault_Exception e) {
+			throwInvalidText("Invalid foood description");
+		} catch (UDDINamingException | RestaurantClientException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 	// View helpers ----------------------------------------------------------
 
-	// /** Helper to convert a domain object to a view. */
-	// private ParkInfo buildParkInfo(Park park) {
-	// ParkInfo info = new ParkInfo();
-	// info.setId(park.getId());
-	// info.setCoords(buildCoordinatesView(park.getCoordinates()));
-	// info.setCapacity(park.getMaxCapacity());
-	// info.setFreeSpaces(park.getFreeDocks());
-	// info.setAvailableCars(park.getAvailableCars());
-	// return info;
-	// }
+	/** Helper to convert a domain object to a view. */
+	private Food buildFood(Menu menu) {
+		Food food = new Food();
+		food.setId(new FoodId());
+		food.getId().setMenuId(menu.getId().getId());
+		food.setEntree(menu.getEntree());
+		food.setPlate(menu.getPlate());
+		food.setDessert(menu.getDessert());
+		food.setPrice(menu.getPrice());
+		food.setPreparationTime(menu.getPreparationTime());
+		return food;
+	}
 
 	// Exception helpers -----------------------------------------------------
 
 	/** Helper to throw a new BadInit exception. */
-	private void throwBadInitRst(final String message) throws com.forkexec.rts.ws.BadInitFault_Exception {
+	private void throwBadInitRst(final String message) throws com.forkexec.rst.ws.BadInitFault_Exception {
 		com.forkexec.rst.ws.BadInitFault faultInfo = new com.forkexec.rst.ws.BadInitFault();
 		faultInfo.setMessage(message);
 		throw new com.forkexec.rst.ws.BadInitFault_Exception(message, faultInfo);
@@ -185,6 +218,12 @@ public class HubPortImpl implements HubPortType {
 		InvalidUserIdFault faultInfo = new InvalidUserIdFault();
 		faultInfo.setMessage(message);
 		throw new InvalidUserIdFault_Exception(message, faultInfo);
+	}
+
+	private void throwInvalidText(final String message) throws InvalidTextFault_Exception {
+		InvalidTextFault faultInfo = new InvalidTextFault();
+		faultInfo.setMessage(message);
+		throw new InvalidTextFault_Exception(message, faultInfo);
 	}
 
 }
