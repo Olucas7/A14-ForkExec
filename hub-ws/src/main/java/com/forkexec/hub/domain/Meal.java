@@ -3,7 +3,7 @@ package com.forkexec.hub.domain;
 
 public class Meal {
 
-	protected String id;
+	protected MealId id;
 	protected String entree;
 	protected String plate;
 	protected String dessert;
@@ -13,14 +13,14 @@ public class Meal {
 	/**
 	 * @return the id
 	 */
-	public String getId() {
+	public MealId getId() {
 		return id;
 	}
 
 	/**
 	 * @param id the id to set
 	 */
-	public void setId(String id) {
+	public void setId(MealId id) {
 		this.id = id;
 	}
 

@@ -2,7 +2,7 @@ package com.forkexec.hub.domain;
 
 import java.util.Objects;
 
-public class CartItemId { /* Same as FoodId or almost MenuId */
+public class MealId {
 
 	private String restaurantId;
 	private String mealId;

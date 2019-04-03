@@ -55,7 +55,7 @@ public class Hub {
 		uddi = uddiNaming;
 	}
 
-	public void addMenuItemToCart(String userId, CartItemId cartItemId, int itemQuantity)
+	public void addMenuItemToCart(String userId, MealId cartItemId, int itemQuantity)
 			throws InvalidUserIdException, InvalidCartItemIdException {
 		checkUserId(userId);
 		checkCartItemId(cartItemId);
@@ -74,19 +74,21 @@ public class Hub {
 	}
 
 	/* ------------------- VERIFICADORES ------------------- */
-	private void checkCartItemId(CartItemId cartItemId) throws InvalidCartItemIdException {
+	private void checkCartItemId(MealId cartItemId) throws InvalidCartItemIdException {
 		getMealById(cartItemId);
 	}
 
-	public Meal getMealById(CartItemId cartItemId) throws InvalidCartItemIdException {
-		if (!cartItemId.checkValid()) {
+	public Meal getMealById(MealId mealId) throws InvalidCartItemIdException {
+		if (!mealId.checkValid()) {
 			throw new InvalidCartItemIdException();
 		}
 		try {
-			RestaurantClient r = connectToRestaurant(cartItemId.getRestaurantId());
+			RestaurantClient r = connectToRestaurant(mealId.getRestaurantId());
 			MenuId menuIdd = new MenuId();
-			menuIdd.setId(cartItemId.getMealId());
-			return buildMeal(r.getMenu(menuIdd));
+			menuIdd.setId(mealId.getMealId());
+			Meal meal = buildMeal(r.getMenu(menuIdd));
+			meal.getId().setRestaurantId(mealId.getRestaurantId());
+			return meal;
 		} catch (BadMenuIdFault_Exception e) {
 			throw new InvalidCartItemIdException();
 		}
@@ -158,7 +160,8 @@ public class Hub {
 	/** Helper to convert a domain object to a view. */
 	private Meal buildMeal(Menu menu) {
 		Meal meal = new Meal();
-		meal.setId(menu.getId().getId());
+		meal.setId(new MealId());
+		meal.getId().setMealId(menu.getId().getId());
 		meal.setEntree(menu.getEntree());
 		meal.setPlate(menu.getPlate());
 		meal.setDessert(menu.getDessert());

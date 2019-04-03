@@ -3,19 +3,19 @@ package com.forkexec.hub.domain;
 import java.util.Objects;
 
 public class CartItem { /* Same as Food or almost Menu */
-	private CartItemId cartItemId;
+	private MealId mealId;
 	private int itemQuantity;
 
-	public CartItem(CartItemId cartItemId2, int itemQuantity2) {
-		cartItemId = cartItemId2;
+	public CartItem(MealId mealId2, int itemQuantity2) {
+		mealId = mealId2;
 		itemQuantity = itemQuantity2;
 	}
 
 	/**
 	 * @return the cartItemId
 	 */
-	public CartItemId getCartItemId() {
-		return cartItemId;
+	public MealId getMealId() {
+		return mealId;
 	}
 
 	/**
@@ -32,8 +32,8 @@ public class CartItem { /* Same as Food or almost Menu */
 	@Override
 	public boolean equals(Object obj) {
 		CartItem obj_eq = (CartItem) obj;
-		CartItemId cartItemId_this = cartItemId;
-		CartItemId cartItemId_eq = obj_eq.getCartItemId();
+		MealId cartItemId_this = mealId;
+		MealId cartItemId_eq = obj_eq.getMealId();
 		return cartItemId_this.getMealId() == cartItemId_eq.getMealId()
 				&& cartItemId_this.getRestaurantId() == cartItemId_eq.getRestaurantId();
 	}
