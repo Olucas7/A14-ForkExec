@@ -186,7 +186,7 @@ public class RestaurantPortImpl implements RestaurantPortType {
 		carte.set_dessert(menu.getDessert());
 		carte.set_price(menu.getPrice());
 		carte.set_preparationTime(menu.getPreparationTime());
-		return null;
+		return carte;
 	}
 
 	private Menu convertCarteToMenu(Carte carte) {
