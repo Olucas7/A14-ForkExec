@@ -68,11 +68,11 @@ public class Hub {
 		return SingletonHolder.INSTANCE;
 	}
 
-	public static void setUDDINaming(UDDINaming uddiNaming) {
+	public static synchronized void setUDDINaming(UDDINaming uddiNaming) {
 		uddi = uddiNaming;
 	}
 
-	public void chargeAccount(String userId, int moneyToAdd, String creditCardNumber)
+	public synchronized void chargeAccount(String userId, int moneyToAdd, String creditCardNumber)
 			throws InvalidUserIdException, InvalidPointsException, InvalidCardNumberException {
 		checkUserId(userId);
 
@@ -91,7 +91,7 @@ public class Hub {
 		}
 	}
 
-	private int convertMoneyToPoints(int moneyToAdd) throws InvalidPointsException {
+	private synchronized int convertMoneyToPoints(int moneyToAdd) throws InvalidPointsException {
 		switch (moneyToAdd) {
 		case 10:
 			return 1100;
@@ -106,7 +106,7 @@ public class Hub {
 		}
 	}
 
-	public void activateAccount(String userId) throws InvalidUserIdException {
+	public synchronized void activateAccount(String userId) throws InvalidUserIdException {
 		try {
 			for (PointsClient pointsClient : connectToPoints()) {
 				pointsClient.activateUser(userId);
@@ -116,7 +116,7 @@ public class Hub {
 		}
 	}
 
-	public List<Meal> searchMeals(String description) throws InvalidTextException {
+	public synchronized List<Meal> searchMeals(String description) throws InvalidTextException {
 		List<Meal> meals = new ArrayList<Meal>();
 		for (RestaurantClient restaurantClient : connectToRestaurants()) {
 			try {
@@ -133,7 +133,7 @@ public class Hub {
 		return meals;
 	}
 
-	public Meal getMeal(MealId mealId) throws InvalidTextException {
+	public synchronized Meal getMeal(MealId mealId) throws InvalidTextException {
 		Menu menu;
 		try {
 			menu = connectToRestaurant(mealId.getRestaurantId()).getMenu(buildMenuId(mealId));
@@ -143,7 +143,7 @@ public class Hub {
 		return buildMeal(menu);
 	}
 
-	public void addMenuItemToCart(String userId, MealId cartItemId, int itemQuantity)
+	public synchronized void addMenuItemToCart(String userId, MealId cartItemId, int itemQuantity)
 			throws InvalidUserIdException, InvalidCartItemIdException {
 		checkUserId(userId);
 		checkCartItemId(cartItemId);
@@ -151,17 +151,18 @@ public class Hub {
 		carts.get(userId).addToCart(new CartItem(cartItemId, itemQuantity));
 	}
 
-	public void clearCart(String userId) throws InvalidUserIdException {
+	public synchronized void clearCart(String userId) throws InvalidUserIdException {
 		checkUserId(userId);
 		carts.remove(userId);
 	}
 
-	public List<CartItem> cartContents(String userId) throws InvalidUserIdException {
+	public synchronized List<CartItem> cartContents(String userId) throws InvalidUserIdException {
 		checkUserId(userId);
 		return carts.get(userId).getItems();
 	}
 
-	public Cart orderCart(String userId) throws InvalidUserIdException, NotEnoughPointsException, EmptyCartException {
+	public synchronized Cart orderCart(String userId)
+			throws InvalidUserIdException, NotEnoughPointsException, EmptyCartException {
 		checkUserId(userId);
 
 		Cart cart = carts.get(userId);
@@ -250,17 +251,17 @@ public class Hub {
 		return finalCart;
 	}
 
-	public void reset() {
+	public synchronized void reset() {
 		carts.clear();
 		cartCount = 0;
 	}
 
 	/* ------------------- VERIFICADORES ------------------- */
-	private void checkCartItemId(MealId cartItemId) throws InvalidCartItemIdException {
+	private synchronized void checkCartItemId(MealId cartItemId) throws InvalidCartItemIdException {
 		getMealById(cartItemId);
 	}
 
-	public Meal getMealById(MealId mealId) throws InvalidCartItemIdException {
+	public synchronized Meal getMealById(MealId mealId) throws InvalidCartItemIdException {
 		if (!mealId.checkValid()) {
 			throw new InvalidCartItemIdException();
 		}
@@ -277,11 +278,11 @@ public class Hub {
 
 	}
 
-	private void checkUserId(String userId) throws InvalidUserIdException {
+	private synchronized void checkUserId(String userId) throws InvalidUserIdException {
 		getUserBalance(userId);
 	}
 
-	public int getUserBalance(String userId) throws InvalidUserIdException {
+	public synchronized int getUserBalance(String userId) throws InvalidUserIdException {
 		if (userId == null || userId == "") {
 			throw new InvalidUserIdException();
 		}
@@ -300,7 +301,7 @@ public class Hub {
 
 	/* ------------------- CONNECT TO SERVERS ------------------- */
 
-	public List<PointsClient> connectToPoints() {
+	public synchronized List<PointsClient> connectToPoints() {
 		List<PointsClient> points = new ArrayList<PointsClient>();
 
 		try {
@@ -315,7 +316,7 @@ public class Hub {
 		}
 	}
 
-	public CreditCardClient connectToCreditCard() {
+	public synchronized CreditCardClient connectToCreditCard() {
 		try {
 			CreditCardClient creditCard = new CreditCardClient("http://ws.sd.rnl.tecnico.ulisboa.pt:8080/cc");
 			return creditCard;
@@ -324,16 +325,16 @@ public class Hub {
 		}
 	}
 
-	public RestaurantClient connectToRestaurant(String restaurantName) {
+	public synchronized RestaurantClient connectToRestaurant(String restaurantName) {
 		return connectToRestaurantAux(restaurantName).get(0);
 
 	}
 
-	public List<RestaurantClient> connectToRestaurants() {
+	public synchronized List<RestaurantClient> connectToRestaurants() {
 		return connectToRestaurantAux("A14_Restaurant%");
 	}
 
-	private List<RestaurantClient> connectToRestaurantAux(String restaurantString) {
+	private synchronized List<RestaurantClient> connectToRestaurantAux(String restaurantString) {
 		List<RestaurantClient> rests = new ArrayList<RestaurantClient>();
 
 		try {
@@ -349,7 +350,7 @@ public class Hub {
 	}
 
 	/** Helper to convert a domain object to a view. */
-	private Meal buildMeal(Menu menu) {
+	private synchronized Meal buildMeal(Menu menu) {
 		Meal meal = new Meal();
 		meal.setId(new MealId());
 		meal.getId().setMealId(menu.getId().getId());
@@ -361,13 +362,13 @@ public class Hub {
 		return meal;
 	}
 
-	private MenuId buildMenuId(MealId mealId) {
+	private synchronized MenuId buildMenuId(MealId mealId) {
 		MenuId menuId = new MenuId();
 		menuId.setId(mealId.getMealId());
 		return menuId;
 	}
 
-	private CartItem buildCartItem(MenuOrder menuOrder) {
+	private synchronized CartItem buildCartItem(MenuOrder menuOrder) {
 		MealId mealId = new MealId();
 		mealId.setMealId(menuOrder.getMenuId().getId());
 		CartItem cartItem = new CartItem(mealId, menuOrder.getMenuQuantity());
