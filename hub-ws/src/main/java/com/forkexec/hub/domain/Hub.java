@@ -88,7 +88,6 @@ public class Hub {
 			} catch (InvalidPointsFault_Exception e) {
 				throw new InvalidPointsException();
 			}
-
 		}
 	}
 
@@ -105,7 +104,6 @@ public class Hub {
 		default:
 			throw new InvalidPointsException();
 		}
-
 	}
 
 	public void activateAccount(String userId) throws InvalidUserIdException {
