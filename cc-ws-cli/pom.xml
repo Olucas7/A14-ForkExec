@@ -12,9 +12,6 @@
 	<packaging>jar</packaging>
 	<name>${project.artifactId}</name>
 	<properties>
-		<!-- see parent POM for more properties -->
-
-		<mainclass>com.forkexec.cc.ws.cli.ccClientApp</mainclass>
 
 		<wsdl.dir>${basedir}/../cc-contract/</wsdl.dir>
 		<!-- instance number -->
@@ -120,13 +117,7 @@
 				</executions>
 				<configuration>
 					<!-- to prevent deprecation warning: -->
-
 					<killAfter>-1</killAfter>
-					<mainClass>${mainclass}</mainClass>
-					<arguments>
-						<argument>${uddi.url}</argument>
-						<argument>${ws.name}</argument>
-					</arguments>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -144,7 +135,6 @@
 				<configuration>
 					<programs>
 						<program>
-							<mainClass>${mainclass}</mainClass>
 							<id>${project.artifactId}</id>
 						</program>
 					</programs>

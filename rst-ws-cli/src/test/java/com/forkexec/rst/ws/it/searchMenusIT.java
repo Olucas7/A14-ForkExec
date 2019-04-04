@@ -36,7 +36,7 @@ public class searchMenusIT extends BaseIT {
     }
 
     @Test
-    public void success() throws BadMenuIdFault_Exception,BadTextFault_Exception {
+    public void success() throws BadMenuIdFault_Exception, BadTextFault_Exception {
         assertEquals("5", menu.getId().getId());
         assertEquals(50, menu_init.getQuantity());
         assertEquals(25, menu.getPrice());
@@ -45,10 +45,9 @@ public class searchMenusIT extends BaseIT {
         assertEquals("bitoque", menu.getPlate());
         assertEquals(10, menu.getPreparationTime());
         assertEquals(50, menu_init.getQuantity());
-        assertEquals("5",client.searchMenus("serradura").get(0).getId().getId());
+        assertEquals("5", client.searchMenus("serradura").get(0).getId().getId());
     }
 
- 
     @Test(expected = BadTextFault_Exception.class)
     public void nullDescription() throws BadTextFault_Exception {
         client.searchMenus(null);
@@ -66,7 +65,7 @@ public class searchMenusIT extends BaseIT {
 
     @Test
     public void nonExistingDescription() throws BadTextFault_Exception {
-        assertEquals(0,client.searchMenus("açorda").size()); 
+        assertEquals(0, client.searchMenus("açorda").size());
     }
 
     @After
