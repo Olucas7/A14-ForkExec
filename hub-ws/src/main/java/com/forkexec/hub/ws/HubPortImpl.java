@@ -14,7 +14,9 @@ import com.forkexec.hub.domain.MealId;
 import com.forkexec.hub.domain.Hub;
 import com.forkexec.hub.domain.Meal;
 import com.forkexec.hub.domain.exceptions.EmptyCartException;
+import com.forkexec.hub.domain.exceptions.InvalidCardNumberException;
 import com.forkexec.hub.domain.exceptions.InvalidCartItemIdException;
+import com.forkexec.hub.domain.exceptions.InvalidPointsException;
 import com.forkexec.hub.domain.exceptions.InvalidTextException;
 import com.forkexec.hub.domain.exceptions.InvalidUserIdException;
 import com.forkexec.hub.domain.exceptions.NotEnoughPointsException;
@@ -63,8 +65,15 @@ public class HubPortImpl implements HubPortType {
 	@Override
 	public void loadAccount(String userId, int moneyToAdd, String creditCardNumber)
 			throws InvalidCreditCardFault_Exception, InvalidMoneyFault_Exception, InvalidUserIdFault_Exception {
-		Hub.getInstance().chargeAccount(userId, moneyToAdd, creditCardNumber);
-
+		try {
+			Hub.getInstance().chargeAccount(userId, moneyToAdd, creditCardNumber);
+		} catch (InvalidUserIdException e) {
+			throwInvalidUserId(e.getMessage());
+		} catch (InvalidPointsException e) {
+			throwInvalidMoney(e.getMessage());
+		} catch (InvalidCardNumberException e) {
+			throwInvalidCreditCard(e.getMessage());
+		}
 	}
 
 	@Override
@@ -335,6 +344,18 @@ public class HubPortImpl implements HubPortType {
 		EmptyCartFault faultInfo = new EmptyCartFault();
 		faultInfo.setMessage(message);
 		throw new EmptyCartFault_Exception(message, faultInfo);
+	}
+
+	private void throwInvalidCreditCard(final String message) throws InvalidCreditCardFault_Exception {
+		InvalidCreditCardFault faultInfo = new InvalidCreditCardFault();
+		faultInfo.setMessage(message);
+		throw new InvalidCreditCardFault_Exception(message, faultInfo);
+	}
+
+	private void throwInvalidMoney(final String message) throws InvalidMoneyFault_Exception {
+		InvalidMoneyFault faultInfo = new InvalidMoneyFault();
+		faultInfo.setMessage(message);
+		throw new InvalidMoneyFault_Exception(message, faultInfo);
 	}
 
 }

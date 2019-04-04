@@ -8,7 +8,9 @@ import java.util.stream.Collectors;
 
 import com.forkexec.hub.domain.exceptions.NotEnoughPointsException;
 import com.forkexec.hub.domain.exceptions.EmptyCartException;
+import com.forkexec.hub.domain.exceptions.InvalidCardNumberException;
 import com.forkexec.hub.domain.exceptions.InvalidCartItemIdException;
+import com.forkexec.hub.domain.exceptions.InvalidPointsException;
 import com.forkexec.hub.domain.exceptions.InvalidTextException;
 import com.forkexec.hub.domain.exceptions.InvalidUserIdException;
 import com.forkexec.pts.ws.EmailAlreadyExistsFault_Exception;
@@ -27,6 +29,8 @@ import com.forkexec.rst.ws.MenuOrder;
 import com.forkexec.rst.ws.cli.RestaurantClient;
 import com.forkexec.rst.ws.cli.RestaurantClientException;
 
+import pt.ulisboa.tecnico.sdis.ws.cli.CreditCardClient;
+import pt.ulisboa.tecnico.sdis.ws.cli.CreditCardClientException;
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINamingException;
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDIRecord;
@@ -68,17 +72,40 @@ public class Hub {
 		uddi = uddiNaming;
 	}
 
-	public void chargeAccount(String userId, int moneyToAdd, String creditCardNumber) throws InvalidUserIdException {
+	public void chargeAccount(String userId, int moneyToAdd, String creditCardNumber)
+			throws InvalidUserIdException, InvalidPointsException, InvalidCardNumberException {
 		checkUserId(userId);
 
+		CreditCardClient creditCard = connectToCreditCard();
+		if (!(creditCard.validateNumber(creditCardNumber)))
+			throw new InvalidCardNumberException();
 		int pointsToAdd = convertMoneyToPoints(moneyToAdd);
 		for (PointsClient points : connectToPoints()) {
-			points.addPoints(userId, pointsToAdd);
+			try {
+				points.addPoints(userId, pointsToAdd);
+			} catch (InvalidEmailFault_Exception e) {
+				throw new InvalidUserIdException();
+			} catch (InvalidPointsFault_Exception e) {
+				throw new InvalidPointsException();
+			}
+
 		}
 	}
 
-	private int convertMoneyToPoints(int moneyToAdd) {
-		return 0;
+	private int convertMoneyToPoints(int moneyToAdd) throws InvalidPointsException {
+		switch (moneyToAdd) {
+		case 10:
+			return 1100;
+		case 20:
+			return 2100;
+		case 30:
+			return 3300;
+		case 50:
+			return 5500;
+		default:
+			throw new InvalidPointsException();
+		}
+
 	}
 
 	public void activateAccount(String userId) throws InvalidUserIdException {
@@ -281,6 +308,15 @@ public class Hub {
 			return points;
 
 		} catch (UDDINamingException | PointsClientException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public CreditCardClient connectToCreditCard() {
+		try {
+			CreditCardClient creditCard = new CreditCardClient("http://ws.sd.rnl.tecnico.ulisboa.pt:8080/cc");
+			return creditCard;
+		} catch (CreditCardClientException e) {
 			throw new RuntimeException(e);
 		}
 	}
