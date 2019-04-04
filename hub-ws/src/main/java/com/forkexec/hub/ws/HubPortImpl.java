@@ -12,8 +12,10 @@ import com.forkexec.hub.domain.Cart;
 import com.forkexec.hub.domain.CartItem;
 import com.forkexec.hub.domain.MealId;
 import com.forkexec.hub.domain.Hub;
+import com.forkexec.hub.domain.Meal;
 import com.forkexec.hub.domain.exceptions.EmptyCartException;
 import com.forkexec.hub.domain.exceptions.InvalidCartItemIdException;
+import com.forkexec.hub.domain.exceptions.InvalidTextException;
 import com.forkexec.hub.domain.exceptions.InvalidUserIdException;
 import com.forkexec.hub.domain.exceptions.NotEnoughPointsException;
 import com.forkexec.pts.ws.EmailAlreadyExistsFault_Exception;
@@ -51,14 +53,9 @@ public class HubPortImpl implements HubPortType {
 	@Override
 	public void activateAccount(String userId) throws InvalidUserIdFault_Exception {
 		try {
-			for (UDDIRecord p : endpointManager.getUddiNaming().listRecords("A14_Points%")) {
-				PointsClient pointsClient = new PointsClient(p.getUrl(), p.getOrgName());
-				pointsClient.activateUser(userId);
-			}
-		} catch (EmailAlreadyExistsFault_Exception | InvalidEmailFault_Exception e) {
-			throwInvalidUserId("Invalid User Id");
-		} catch (UDDINamingException | PointsClientException e) {
-			e.printStackTrace();
+			Hub.getInstance().activateAccount(userId);
+		} catch (InvalidUserIdException e) {
+			throwInvalidUserId(e.getMessage());
 		}
 
 	}
@@ -86,7 +83,7 @@ public class HubPortImpl implements HubPortType {
 		if (foodQuantity <= 0)
 			throwInvalidFoodQuantity("Invalid Quantity");
 		try {
-			Hub.getInstance().addMenuItemToCart(userId, buildCartItemId(foodId), foodQuantity);
+			Hub.getInstance().addMenuItemToCart(userId, buildMealId(foodId), foodQuantity);
 		} catch (InvalidUserIdException e) {
 			throwInvalidUserId(e.getMessage());
 		} catch (InvalidCartItemIdException e) {
@@ -101,7 +98,6 @@ public class HubPortImpl implements HubPortType {
 		} catch (InvalidUserIdException e) {
 			throwInvalidUserId(e.getMessage());
 		}
-
 	}
 
 	@Override
@@ -133,7 +129,13 @@ public class HubPortImpl implements HubPortType {
 
 	@Override
 	public Food getFood(FoodId foodId) throws InvalidFoodIdFault_Exception {
-		// TODO
+		MealId mealId = buildMealId(foodId);
+		try {
+			Meal meal = Hub.getInstance().getMeal(mealId);
+			return buildFood(meal);
+		} catch (InvalidTextException e) {
+			throwInvalidFoodId(e.getMessage());
+		}
 		return null;
 	}
 
@@ -205,25 +207,21 @@ public class HubPortImpl implements HubPortType {
 	Comparator<Food> byPrice = Comparator.comparing(Food::getPrice);
 
 	public List<Food> searches(String description, Comparator<Food> comparator) throws InvalidTextFault_Exception {
+
 		try {
 			List<Food> foods = new ArrayList<Food>();
-			for (UDDIRecord r : endpointManager.getUddiNaming().listRecords("A14_Restaurants%")) {
-				RestaurantClient restaurantClient = new RestaurantClient(r.getUrl(), r.getOrgName());
 
-				foods.addAll(restaurantClient.searchMenus(description).stream().map(menu -> {
-					Food food = buildFood(menu);
-					food.getId().setRestaurantId(r.getOrgName());
-					return food;
+			foods.addAll(Hub.getInstance().searchMeals(description).stream().map(meal -> {
+				Food food = buildFood(meal);
+				return food;
 
-				}).collect(Collectors.toList()));
+			}).collect(Collectors.toList()));
 
-				foods.sort(comparator);
-			}
+			foods.sort(comparator);
+
 			return foods;
-		} catch (BadTextFault_Exception e) {
-			throwInvalidText("Invalid food description");
-		} catch (UDDINamingException | RestaurantClientException e) {
-			e.printStackTrace();
+		} catch (InvalidTextException e) {
+			throwInvalidText(e.getMessage());
 		}
 		return null;
 	}
@@ -243,7 +241,7 @@ public class HubPortImpl implements HubPortType {
 		return food;
 	}
 
-	private MealId buildCartItemId(FoodId id) {
+	private MealId buildMealId(FoodId id) {
 		MealId cid = new MealId();
 		cid.setRestaurantId(id.getRestaurantId());
 		cid.setMealId(id.getMenuId());
@@ -268,6 +266,24 @@ public class HubPortImpl implements HubPortType {
 			foodOrder.getItems().add(buildFoodOrderItem(item));
 		}
 		return foodOrder;
+	}
+
+	private FoodId buildFoodId(MealId mealId) {
+		FoodId foodId = new FoodId();
+		foodId.setMenuId(mealId.getMealId());
+		foodId.setRestaurantId(mealId.getRestaurantId());
+		return foodId;
+	}
+
+	private Food buildFood(Meal meal) {
+		Food food = new Food();
+		food.setId(buildFoodId(meal.getId()));
+		food.setDessert(meal.getDessert());
+		food.setEntree(meal.getEntree());
+		food.setPlate(meal.getPlate());
+		food.setPreparationTime(meal.getPreparationTime());
+		food.setPrice(meal.getPrice());
+		return food;
 	}
 
 	// Exception helpers -----------------------------------------------------

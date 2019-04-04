@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.forkexec.hub.domain.exceptions.NotEnoughPointsException;
 import com.forkexec.hub.domain.exceptions.EmptyCartException;
 import com.forkexec.hub.domain.exceptions.InvalidCartItemIdException;
+import com.forkexec.hub.domain.exceptions.InvalidTextException;
 import com.forkexec.hub.domain.exceptions.InvalidUserIdException;
+import com.forkexec.pts.ws.EmailAlreadyExistsFault_Exception;
 import com.forkexec.pts.ws.InvalidEmailFault_Exception;
 import com.forkexec.pts.ws.InvalidPointsFault_Exception;
 import com.forkexec.pts.ws.NotEnoughBalanceFault_Exception;
@@ -16,6 +19,7 @@ import com.forkexec.pts.ws.cli.PointsClient;
 import com.forkexec.pts.ws.cli.PointsClientException;
 import com.forkexec.rst.ws.BadMenuIdFault_Exception;
 import com.forkexec.rst.ws.BadQuantityFault_Exception;
+import com.forkexec.rst.ws.BadTextFault_Exception;
 import com.forkexec.rst.ws.InsufficientQuantityFault_Exception;
 import com.forkexec.rst.ws.Menu;
 import com.forkexec.rst.ws.MenuId;
@@ -62,6 +66,43 @@ public class Hub {
 
 	public static void setUDDINaming(UDDINaming uddiNaming) {
 		uddi = uddiNaming;
+	}
+
+	public void activateAccount(String userId) throws InvalidUserIdException {
+		try {
+			for (PointsClient pointsClient : connectToPoints()) {
+				pointsClient.activateUser(userId);
+			}
+		} catch (EmailAlreadyExistsFault_Exception | InvalidEmailFault_Exception e) {
+			throw new InvalidUserIdException();
+		}
+	}
+
+	public List<Meal> searchMeals(String description) throws InvalidTextException {
+		List<Meal> meals = new ArrayList<Meal>();
+		for (RestaurantClient restaurantClient : connectToRestaurants()) {
+			try {
+				meals.addAll(restaurantClient.searchMenus(description).stream().map(menu -> {
+					Meal meal = buildMeal(menu);
+					meal.getId().setRestaurantId(restaurantClient.getWsURL());
+					return meal;
+
+				}).collect(Collectors.toList()));
+			} catch (BadTextFault_Exception e) {
+				throw new InvalidTextException();
+			}
+		}
+		return meals;
+	}
+
+	public Meal getMeal(MealId mealId) throws InvalidTextException {
+		Menu menu;
+		try {
+			menu = connectToRestaurant(mealId.getRestaurantId()).getMenu(buildMenuId(mealId));
+		} catch (BadMenuIdFault_Exception e) {
+			throw new InvalidTextException();
+		}
+		return buildMeal(menu);
 	}
 
 	public void addMenuItemToCart(String userId, MealId cartItemId, int itemQuantity)
@@ -280,5 +321,4 @@ public class Hub {
 		CartItem cartItem = new CartItem(mealId, menuOrder.getMenuQuantity());
 		return cartItem;
 	}
-
 }
