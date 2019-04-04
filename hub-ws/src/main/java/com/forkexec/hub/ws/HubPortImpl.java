@@ -197,6 +197,17 @@ public class HubPortImpl implements HubPortType {
 	/** Return all variables to default values. */
 	@Override
 	public void ctrlClear() {
+		try {
+			for (UDDIRecord e : endpointManager.getUddiNaming().listRecords("A14_Restaurant%")) {
+				new RestaurantClient(e.getUrl(), e.getOrgName()).ctrlClear();
+			}
+			for (UDDIRecord e : endpointManager.getUddiNaming().listRecords("A14_Points%")) {
+				new PointsClient(e.getUrl(), e.getOrgName()).ctrlClear();
+			}
+		} catch (RestaurantClientException | UDDINamingException | PointsClientException e1) {
+			throw new RuntimeException();
+		}
+		Hub.getInstance().reset();
 	}
 
 	/** Set variables with specific values. */

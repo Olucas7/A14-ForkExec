@@ -250,6 +250,11 @@ public class Hub {
 		return finalCart;
 	}
 
+	public void reset() {
+		carts.clear();
+		cartCount = 0;
+	}
+
 	/* ------------------- VERIFICADORES ------------------- */
 	private void checkCartItemId(MealId cartItemId) throws InvalidCartItemIdException {
 		getMealById(cartItemId);
