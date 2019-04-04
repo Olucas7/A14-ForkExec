@@ -45,13 +45,14 @@ public class RestaurantPortImpl implements RestaurantPortType {
 			return convertCarteToMenu(carte);
 		} catch (BadMenuIdException e) {
 			throwBadMenuId(e.getId());
-		} return null;
+		}
+		return null;
 		// checkar string do menuid?
 	}
 
 	@Override
 	public List<Menu> searchMenus(String descriptionText) throws BadTextFault_Exception {
-		if(!validString(descriptionText)) {
+		if (!validString(descriptionText)) {
 			throwBadText("invalid description");
 		}
 		List<Carte> cartes;
@@ -60,7 +61,8 @@ public class RestaurantPortImpl implements RestaurantPortType {
 			return convertListOfCartesToListOfMenus(cartes);
 		} catch (BadTextException e) {
 			throwBadText(e.getMessage());
-		} return null;
+		}
+		return null;
 	}
 
 	@Override
@@ -82,19 +84,20 @@ public class RestaurantPortImpl implements RestaurantPortType {
 			throwBadMenuId(e.getId());
 		} catch (InsufficientQuantityException e) {
 			throwInsufficientQuantity(e.getMessage());
-		}	return null;
+		}
+		return null;
 	}
 
-	//Validation operations --------------------------------------------------
+	// Validation operations --------------------------------------------------
 
 	public boolean validString(String message) {
-        if (message == null || message.trim().length() == 0) 
-            return false;
+		if (message == null || message.trim().length() == 0)
+			return false;
 
-        String regex = "\\s";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher mat = pattern.matcher(message);
-        if(mat.matches()) //contains white spaces
+		String regex = "\\s";
+		Pattern pattern = Pattern.compile(regex);
+		Matcher mat = pattern.matcher(message);
+		if (mat.matches()) // contains white spaces
 			return false;
 		return true;
 	}
@@ -104,8 +107,8 @@ public class RestaurantPortImpl implements RestaurantPortType {
 	}
 
 	private boolean isValidMenu(Menu menu) {
-		return menu.getPrice() > 0 && menu.getPreparationTime() > 0 &&
-		validString(menu.getEntree()) && validString(menu.getPlate()) && validString(menu.getDessert());
+		return menu.getPrice() > 0 && menu.getPreparationTime() > 0 && validString(menu.getEntree())
+				&& validString(menu.getPlate()) && validString(menu.getDessert());
 	}
 
 	// Control operations ----------------------------------------------------
@@ -149,23 +152,22 @@ public class RestaurantPortImpl implements RestaurantPortType {
 
 	// /** Helper to convert a domain object to a view. */
 	// private ParkInfo buildParkInfo(Park park) {
-		// ParkInfo info = new ParkInfo();
-		// info.setId(park.getId());
-		// info.setCoords(buildCoordinatesView(park.getCoordinates()));
-		// info.setCapacity(park.getMaxCapacity());
-		// info.setFreeSpaces(park.getFreeDocks());
-		// info.setAvailableCars(park.getAvailableCars());
-		// return info;
+	// ParkInfo info = new ParkInfo();
+	// info.setId(park.getId());
+	// info.setCoords(buildCoordinatesView(park.getCoordinates()));
+	// info.setCapacity(park.getMaxCapacity());
+	// info.setFreeSpaces(park.getFreeDocks());
+	// info.setAvailableCars(park.getAvailableCars());
+	// return info;
 	// }
 
 	private List<Carte> convertListOfMenuInitToListOfCartes(List<MenuInit> initialMenus) throws BadInitFault_Exception {
 		List<Carte> cartes = new ArrayList<Carte>();
-		for (MenuInit menu_info:initialMenus) {
-			if (isValidMenuInit(menu_info))  {
+		for (MenuInit menu_info : initialMenus) {
+			if (isValidMenuInit(menu_info)) {
 				Carte c = convertMenuInitToCarte(menu_info);
 				cartes.add(c);
-			}
-			else {
+			} else {
 				throwBadInit("invalid menu init");
 			}
 		}
@@ -214,7 +216,7 @@ public class RestaurantPortImpl implements RestaurantPortType {
 		MenuOrder mo = new MenuOrder();
 		MenuOrderId moid = new MenuOrderId();
 		MenuId mid = new MenuId();
-		
+
 		moid.setId(order.get_id());
 		mid.setId(order.get_menuId());
 
@@ -224,7 +226,7 @@ public class RestaurantPortImpl implements RestaurantPortType {
 
 		return mo;
 	}
-	
+
 	// Exception helpers -----------------------------------------------------
 
 	/** Helper to throw a new BadInit exception. */
@@ -245,7 +247,7 @@ public class RestaurantPortImpl implements RestaurantPortType {
 		faultInfo.message = message;
 		throw new BadMenuIdFault_Exception(message, faultInfo);
 	}
-	
+
 	private void throwBadQuantity(final String message) throws BadQuantityFault_Exception {
 		BadQuantityFault faultInfo = new BadQuantityFault();
 		faultInfo.message = message;

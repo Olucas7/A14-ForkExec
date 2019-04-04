@@ -4,9 +4,12 @@ import java.awt.MenuItem;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.jws.WebService;
+import javax.management.RuntimeErrorException;
 
 import com.forkexec.hub.domain.Cart;
 import com.forkexec.hub.domain.CartItem;
@@ -20,12 +23,15 @@ import com.forkexec.hub.domain.exceptions.InvalidPointsException;
 import com.forkexec.hub.domain.exceptions.InvalidTextException;
 import com.forkexec.hub.domain.exceptions.InvalidUserIdException;
 import com.forkexec.hub.domain.exceptions.NotEnoughPointsException;
+import com.forkexec.pts.ws.BadInitFault_Exception;
 import com.forkexec.pts.ws.EmailAlreadyExistsFault_Exception;
 import com.forkexec.pts.ws.InvalidEmailFault_Exception;
 import com.forkexec.pts.ws.cli.PointsClient;
 import com.forkexec.pts.ws.cli.PointsClientException;
 import com.forkexec.rst.ws.BadTextFault_Exception;
 import com.forkexec.rst.ws.Menu;
+import com.forkexec.rst.ws.MenuId;
+import com.forkexec.rst.ws.MenuInit;
 import com.forkexec.rst.ws.cli.RestaurantClient;
 import com.forkexec.rst.ws.cli.RestaurantClientException;
 
@@ -202,13 +208,94 @@ public class HubPortImpl implements HubPortType {
 	/** Set variables with specific values. */
 	@Override
 	public void ctrlInitFood(List<FoodInit> initialFoods) throws InvalidInitFault_Exception {
-		// TODO Auto-generated method stub
+		List<MenuInit> menus = new ArrayList<MenuInit>();
+		try {
+			for (UDDIRecord e : endpointManager.getUddiNaming().listRecords("A14_Restaurant%")) {
+
+				for (FoodInit fo : initialFoods) {
+					if (fo.getFood().getId().getRestaurantId().equals(e.getOrgName())) {
+						RestaurantClient client = new RestaurantClient(e.getUrl(), e.getOrgName());
+						menus = buildListOfMenuInit(initialFoods);
+						client.ctrlInit(menus);
+
+					}
+				}
+			}
+		} catch (UDDINamingException | RestaurantClientException e) {
+			throw new RuntimeException();
+		} catch (com.forkexec.rst.ws.BadInitFault_Exception e) {
+			throwBadInit("invalid food init to initialize");
+		}
+	}
+
+	private List<MenuInit> buildListOfMenuInit(List<FoodInit> initialFoods) throws InvalidInitFault_Exception {
+		List<MenuInit> menus = new ArrayList<MenuInit>();
+		for (FoodInit food_info : initialFoods) {
+			if (isValidFoodInit(food_info)) {
+				MenuInit m = buildMenuInit(food_info);
+				menus.add(m);
+			} else {
+				throwBadInit("invalid food init");
+			}
+		}
+		return menus;
+	}
+
+	private MenuInit buildMenuInit(FoodInit food_info) {
+		MenuInit m = buildMenu(food_info.getFood());
+		m.setQuantity(food_info.getQuantity());
+		return m;
+	}
+
+	private MenuInit buildMenu(Food food) {
+		MenuInit menu_info = new MenuInit();
+		Menu m = new Menu();
+		MenuId menu_id = new MenuId();
+
+		menu_id.setId(food.getId().getMenuId());
+		m.setId(menu_id);
+		m.setEntree(food.getEntree());
+		m.setPlate(food.getPlate());
+		m.setDessert(food.getDessert());
+		m.setPrice(food.getPrice());
+		m.setPreparationTime(food.getPreparationTime());
+		menu_info.setMenu(m);
+		return menu_info;
+	}
+
+	private boolean isValidFoodInit(FoodInit food_info) {
+		return food_info.getQuantity() > 0 && isValidFood(food_info.getFood());
+	}
+
+	private boolean isValidFood(Food food) {
+		return food.getPrice() > 0 && food.getPreparationTime() > 0 && validString(food.getEntree())
+				&& validString(food.getPlate()) && validString(food.getDessert());
+	}
+
+	public boolean validString(String message) {
+		if (message == null || message.trim().length() == 0)
+			return false;
+
+		String regex = "\\s";
+		Pattern pattern = Pattern.compile(regex);
+		Matcher mat = pattern.matcher(message);
+		if (mat.matches()) // contains white spaces
+			return false;
+		return true;
 	}
 
 	@Override
 	public void ctrlInitUserPoints(int startPoints) throws InvalidInitFault_Exception {
-		// TODO Auto-generated method stub
-
+		try {
+			for (UDDIRecord e : endpointManager.getUddiNaming().listRecords("A14_Points%")) {
+				PointsClient client = new PointsClient(e.getUrl(), e.getOrgName());
+				client.ctrlInit(startPoints);
+			}
+		} catch (UDDINamingException | PointsClientException e) {
+			throw new RuntimeException();
+		} catch (BadInitFault_Exception e) {
+			throwBadInit("invalid points to initialize");
+		}
 	}
 
 	// Aux function ----------------------------------------------------------
@@ -298,16 +385,10 @@ public class HubPortImpl implements HubPortType {
 	// Exception helpers -----------------------------------------------------
 
 	/** Helper to throw a new BadInit exception. */
-	private void throwBadInitRst(final String message) throws com.forkexec.rst.ws.BadInitFault_Exception {
-		com.forkexec.rst.ws.BadInitFault faultInfo = new com.forkexec.rst.ws.BadInitFault();
+	private void throwBadInit(final String message) throws InvalidInitFault_Exception {
+		InvalidInitFault faultInfo = new InvalidInitFault();
 		faultInfo.setMessage(message);
-		throw new com.forkexec.rst.ws.BadInitFault_Exception(message, faultInfo);
-	}
-
-	private void throwBadInitPts(final String message) throws com.forkexec.pts.ws.BadInitFault_Exception {
-		com.forkexec.pts.ws.BadInitFault faultInfo = new com.forkexec.pts.ws.BadInitFault();
-		faultInfo.setMessage(message);
-		throw new com.forkexec.pts.ws.BadInitFault_Exception(message, faultInfo);
+		throw new InvalidInitFault_Exception(message, faultInfo);
 	}
 
 	private void throwInvalidUserId(final String message) throws InvalidUserIdFault_Exception {

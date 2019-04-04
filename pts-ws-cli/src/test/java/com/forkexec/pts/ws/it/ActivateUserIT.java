@@ -23,14 +23,16 @@ public class ActivateUserIT extends BaseIT {
 	private final int STARTPOINTS = 500;
 
 	@Test
-	public void success() throws EmailAlreadyExistsFault_Exception, InvalidEmailFault_Exception, BadInitFault_Exception {
+	public void success()
+			throws EmailAlreadyExistsFault_Exception, InvalidEmailFault_Exception, BadInitFault_Exception {
 		client.ctrlInit(STARTPOINTS);
 
 		client.activateUser(VALID_EMAIL);
 		assertEquals(STARTPOINTS, client.pointsBalance(VALID_EMAIL));
 	}
 
-	// Testing emails -------------------------------------------------------------------------
+	// Testing emails
+	// -------------------------------------------------------------------------
 	@Test(expected = EmailAlreadyExistsFault_Exception.class)
 	public void alreadyExistsEmailTest() throws InvalidEmailFault_Exception, EmailAlreadyExistsFault_Exception {
 		client.activateUser(VALID_EMAIL);
