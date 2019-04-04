@@ -50,7 +50,7 @@ public class getMenuIT extends BaseIT {
         assertEquals("bitoque", menu.getPlate());
         assertEquals(10, menu.getPreparationTime());
         assertEquals(10, menu_init.getQuantity());
-        client.getMenu(ok_id_menu);
+        assertEquals("10",client.getMenu(ok_id_menu).getId().getId());
     }
 
     @Test(expected = BadMenuIdFault_Exception.class)

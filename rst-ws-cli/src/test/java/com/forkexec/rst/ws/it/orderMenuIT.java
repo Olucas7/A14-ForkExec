@@ -24,14 +24,16 @@ public class orderMenuIT extends BaseIT {
     private MenuId null_id_menu = new MenuId();
     private MenuId spaced_id_menu = new MenuId();
     private MenuId non_existing_id_menu = new MenuId();
+    
+    private MenuOrder new_order = new MenuOrder();
 
     @Before
     public void setUp() throws BadInitFault_Exception {
         ok_id_menu.setId("10");
         menu.setId(ok_id_menu);
         menu.setPrice(5);
-        menu.setDessert("mousse de chocolate");
-        menu.setEntree("beringela recheada");
+        menu.setDessert("mousse_de_chocolate");
+        menu.setEntree("beringela_recheada");
         menu.setPlate("tofu");
         menu.setPreparationTime(10);
         menu_init.setMenu(menu);
@@ -45,12 +47,14 @@ public class orderMenuIT extends BaseIT {
         assertEquals("10", menu.getId().getId());
         assertEquals(50, menu_init.getQuantity());
         assertEquals(5, menu.getPrice());
-        assertEquals("mousse de chocolate", menu.getDessert());
-        assertEquals("beringela recheada", menu.getEntree());
+        assertEquals("mousse_de_chocolate", menu.getDessert());
+        assertEquals("beringela_recheada", menu.getEntree());
         assertEquals("tofu", menu.getPlate());
         assertEquals(10, menu.getPreparationTime());
         assertEquals(50, menu_init.getQuantity());
-        client.orderMenu(ok_id_menu,50);
+        new_order = client.orderMenu(ok_id_menu,50);
+        assertEquals(50,new_order.getMenuQuantity());
+        assertEquals("10",new_order.getMenuId().getId());
         
     }
 
