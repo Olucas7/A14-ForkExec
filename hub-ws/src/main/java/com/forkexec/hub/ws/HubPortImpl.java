@@ -227,19 +227,18 @@ public class HubPortImpl implements HubPortType {
 		} catch (UDDINamingException | RestaurantClientException e) {
 			throw new RuntimeException();
 		} catch (com.forkexec.rst.ws.BadInitFault_Exception e) {
-			throwInvalidInit("invalid food init to initialize");
+			throwInvalidInit(e.getMessage());
 		}
 	}
 
 	private List<MenuInit> buildListOfMenuInit(List<FoodInit> initialFoods) throws InvalidInitFault_Exception {
 		List<MenuInit> menus = new ArrayList<MenuInit>();
 		for (FoodInit food_info : initialFoods) {
-			if (isValidFoodInit(food_info)) {
-				MenuInit m = buildMenuInit(food_info);
-				menus.add(m);
-			} else {
+			if (!isValidFoodInit(food_info))
 				throwInvalidInit("invalid food init");
-			}
+			MenuInit m = buildMenuInit(food_info);
+			menus.add(m);
+
 		}
 		return menus;
 	}
@@ -254,7 +253,7 @@ public class HubPortImpl implements HubPortType {
 		} catch (UDDINamingException | PointsClientException e) {
 			throw new RuntimeException();
 		} catch (com.forkexec.pts.ws.BadInitFault_Exception e) {
-			throwInvalidInit("invalid points to initialize");
+			throwInvalidInit(e.getMessage());
 		}
 	}
 
