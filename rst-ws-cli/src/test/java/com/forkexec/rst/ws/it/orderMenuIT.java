@@ -80,8 +80,13 @@ public class orderMenuIT extends BaseIT {
     }
 
     @Test(expected = BadQuantityFault_Exception.class)
-    public void badQuantity() throws BadQuantityFault_Exception, BadMenuIdFault_Exception, InsufficientQuantityFault_Exception {
+    public void negativeQuantity() throws BadQuantityFault_Exception, BadMenuIdFault_Exception, InsufficientQuantityFault_Exception {
         client.orderMenu(ok_id_menu,-2);
+    }
+
+    @Test(expected = BadQuantityFault_Exception.class)
+    public void nullQuantity() throws BadQuantityFault_Exception, BadMenuIdFault_Exception, InsufficientQuantityFault_Exception {
+        client.orderMenu(ok_id_menu,0);
     }
 
     @Test(expected = InsufficientQuantityFault_Exception.class)
