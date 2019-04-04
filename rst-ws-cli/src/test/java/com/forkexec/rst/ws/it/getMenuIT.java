@@ -24,9 +24,9 @@ public class getMenuIT extends BaseIT {
     private MenuId null_id_menu = new MenuId();
     private MenuId spaced_id_menu = new MenuId();
     private MenuId non_existing_id_menu = new MenuId();
- 
+
     @Before
-    public void setUp() throws BadInitFault_Exception{
+    public void setUp() throws BadInitFault_Exception {
         ok_id_menu.setId("10");
         menu.setId(ok_id_menu);
         menu.setPrice(5);
@@ -39,22 +39,25 @@ public class getMenuIT extends BaseIT {
         menuInitials.add(menu_init);
         client.ctrlInit(menuInitials);
     }
+
     @Test
-    public void success() throws BadMenuIdFault_Exception{
+    public void success() throws BadMenuIdFault_Exception {
         assertEquals("10", menu.getId().getId());
         assertEquals(10, menu_init.getQuantity());
         assertEquals(5, menu.getPrice());
         assertEquals("serradura", menu.getDessert());
-        assertEquals("camarao",menu.getEntree());
-        assertEquals("bitoque",menu.getPlate());
-        assertEquals(10,menu.getPreparationTime());
+        assertEquals("camarao", menu.getEntree());
+        assertEquals("bitoque", menu.getPlate());
+        assertEquals(10, menu.getPreparationTime());
         assertEquals(10, menu_init.getQuantity());
+        client.getMenu(ok_id_menu);
     }
 
     @Test(expected = BadMenuIdFault_Exception.class)
     public void blankId() throws BadMenuIdFault_Exception {
         empty_id_menu.setId(null);
         client.getMenu(empty_id_menu);
+
     }
 
     @Test(expected = BadMenuIdFault_Exception.class)
@@ -70,7 +73,7 @@ public class getMenuIT extends BaseIT {
     }
 
     @Test(expected = BadMenuIdFault_Exception.class)
-    public void nonExistingId() throws BadMenuIdFault_Exception{
+    public void nonExistingId() throws BadMenuIdFault_Exception {
         non_existing_id_menu.setId("8");
         client.getMenu(non_existing_id_menu);
     }
