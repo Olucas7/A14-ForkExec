@@ -91,13 +91,7 @@ public class RestaurantPortImpl implements RestaurantPortType {
 	// Validation operations --------------------------------------------------
 
 	public boolean validString(String message) {
-		if (message == null || message.trim().length() == 0)
-			return false;
-
-		String regex = "\\s";
-		Pattern pattern = Pattern.compile(regex);
-		Matcher mat = pattern.matcher(message);
-		if (mat.matches()) // contains white spaces
+		if (message == null || message.trim().length() == 0 || message.contains(" "))
 			return false;
 		return true;
 	}
