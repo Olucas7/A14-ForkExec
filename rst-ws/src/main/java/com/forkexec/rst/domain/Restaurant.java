@@ -94,4 +94,8 @@ public class Restaurant {
 		_database.addAll(cartes);
 	}
 
+	public List<Carte> getMenus() {
+		return _database;
+	}
+
 }

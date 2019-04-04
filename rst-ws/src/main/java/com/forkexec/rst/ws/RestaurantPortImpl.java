@@ -123,6 +123,9 @@ public class RestaurantPortImpl implements RestaurantPortType {
 		StringBuilder builder = new StringBuilder();
 		builder.append("Hello ").append(inputMessage);
 		builder.append(" from ").append(wsName);
+		for (Carte c : Restaurant.getInstance().getMenus()) {
+			builder.append("\nwith ").append(c.toString());
+		}
 		return builder.toString();
 	}
 
