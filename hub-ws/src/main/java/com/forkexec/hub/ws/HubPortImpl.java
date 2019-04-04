@@ -186,7 +186,7 @@ public class HubPortImpl implements HubPortType {
 			for (UDDIRecord e : endpointManager.getUddiNaming().listRecords("A14_Restaurant%")) {
 				RestaurantClient client = new RestaurantClient(e.getUrl(), e.getOrgName());
 				String msg = client.ctrlPing(inputMessage);
-				builder.append("\nand ").append(msg);
+				builder.append("\nAND ").append(msg);
 			}
 		} catch (UDDINamingException | RestaurantClientException er) {
 			builder.append("\nbut ").append(er.toString());
@@ -216,13 +216,16 @@ public class HubPortImpl implements HubPortType {
 		List<MenuInit> menus = new ArrayList<MenuInit>();
 		try {
 			for (UDDIRecord e : endpointManager.getUddiNaming().listRecords("A14_Restaurant%")) {
+				List<FoodInit> toSendFoods = new ArrayList<FoodInit>();
 				for (FoodInit fo : initialFoods) {
 					if (fo.getFood().getId().getRestaurantId().equals(e.getOrgName())) {
-						RestaurantClient client = new RestaurantClient(e.getUrl(), e.getOrgName());
-						menus = buildListOfMenuInit(initialFoods);
-						client.ctrlInit(menus);
+						toSendFoods.add(fo);
 					}
 				}
+				RestaurantClient client = new RestaurantClient(e.getUrl(), e.getOrgName());
+				menus = buildListOfMenuInit(toSendFoods);
+				if (menus.size() != 0)
+					client.ctrlInit(menus);
 			}
 		} catch (UDDINamingException | RestaurantClientException e) {
 			throw new RuntimeException();
@@ -238,7 +241,6 @@ public class HubPortImpl implements HubPortType {
 				throwInvalidInit("invalid food init");
 			MenuInit m = buildMenuInit(food_info);
 			menus.add(m);
-
 		}
 		return menus;
 	}

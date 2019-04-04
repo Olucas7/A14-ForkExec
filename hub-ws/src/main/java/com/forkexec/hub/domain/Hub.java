@@ -330,7 +330,7 @@ public class Hub {
 	}
 
 	public List<RestaurantClient> connectToRestaurants() {
-		return connectToRestaurantAux("A14_Points%");
+		return connectToRestaurantAux("A14_Restaurant%");
 	}
 
 	private List<RestaurantClient> connectToRestaurantAux(String restaurantString) {
