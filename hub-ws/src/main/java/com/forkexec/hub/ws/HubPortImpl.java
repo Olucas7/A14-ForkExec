@@ -12,8 +12,10 @@ import com.forkexec.hub.domain.Cart;
 import com.forkexec.hub.domain.CartItem;
 import com.forkexec.hub.domain.MealId;
 import com.forkexec.hub.domain.Hub;
+import com.forkexec.hub.domain.exceptions.EmptyCartException;
 import com.forkexec.hub.domain.exceptions.InvalidCartItemIdException;
 import com.forkexec.hub.domain.exceptions.InvalidUserIdException;
+import com.forkexec.hub.domain.exceptions.NotEnoughPointsException;
 import com.forkexec.pts.ws.EmailAlreadyExistsFault_Exception;
 import com.forkexec.pts.ws.InvalidEmailFault_Exception;
 import com.forkexec.pts.ws.cli.PointsClient;
@@ -105,7 +107,17 @@ public class HubPortImpl implements HubPortType {
 	@Override
 	public FoodOrder orderCart(String userId)
 			throws EmptyCartFault_Exception, InvalidUserIdFault_Exception, NotEnoughPointsFault_Exception {
-		// Cart order = Hub.getInstance().orderCart(userId);
+
+		try {
+			Cart order = Hub.getInstance().orderCart(userId);
+			return buildFoodOrder(order);
+		} catch (InvalidUserIdException e) {
+			throwInvalidUserId(e.getMessage());
+		} catch (NotEnoughPointsException e) {
+			throwNotEnoughPoints(e.getMessage());
+		} catch (EmptyCartException e) {
+			throwEmptyCart(e.getMessage());
+		}
 		return null;
 	}
 
@@ -247,6 +259,17 @@ public class HubPortImpl implements HubPortType {
 		return food;
 	}
 
+	private FoodOrder buildFoodOrder(Cart order) {
+		FoodOrderId foodOrderId = new FoodOrderId();
+		foodOrderId.setId(order.getId());
+		FoodOrder foodOrder = new FoodOrder();
+		foodOrder.setFoodOrderId(foodOrderId);
+		for (CartItem item : order.getItems()) {
+			foodOrder.getItems().add(buildFoodOrderItem(item));
+		}
+		return foodOrder;
+	}
+
 	// Exception helpers -----------------------------------------------------
 
 	/** Helper to throw a new BadInit exception. */
@@ -284,6 +307,18 @@ public class HubPortImpl implements HubPortType {
 		InvalidFoodQuantityFault faultInfo = new InvalidFoodQuantityFault();
 		faultInfo.setMessage(message);
 		throw new InvalidFoodQuantityFault_Exception(message, faultInfo);
+	}
+
+	private void throwNotEnoughPoints(final String message) throws NotEnoughPointsFault_Exception {
+		NotEnoughPointsFault faultInfo = new NotEnoughPointsFault();
+		faultInfo.setMessage(message);
+		throw new NotEnoughPointsFault_Exception(message, faultInfo);
+	}
+
+	private void throwEmptyCart(final String message) throws EmptyCartFault_Exception {
+		EmptyCartFault faultInfo = new EmptyCartFault();
+		faultInfo.setMessage(message);
+		throw new EmptyCartFault_Exception(message, faultInfo);
 	}
 
 }

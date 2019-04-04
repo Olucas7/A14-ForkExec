@@ -39,4 +39,10 @@ public class MealId {
 		return restaurantId != null && restaurantId != "" && mealId != null && mealId != "";
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		MealId mealId2 = (MealId) obj;
+		return mealId2.getMealId() == this.mealId && mealId2.getRestaurantId() == this.restaurantId;
+	}
+
 }

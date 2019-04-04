@@ -32,9 +32,20 @@ public class CartItem { /* Same as Food or almost Menu */
 	@Override
 	public boolean equals(Object obj) {
 		CartItem obj_eq = (CartItem) obj;
-		MealId cartItemId_this = mealId;
-		MealId cartItemId_eq = obj_eq.getMealId();
-		return cartItemId_this.getMealId() == cartItemId_eq.getMealId()
-				&& cartItemId_this.getRestaurantId() == cartItemId_eq.getRestaurantId();
+		return obj_eq.getMealId() == this.mealId;
+	}
+
+	/**
+	 * @param mealId the mealId to set
+	 */
+	public void setMealId(MealId mealId) {
+		this.mealId = mealId;
+	}
+
+	/**
+	 * @param itemQuantity the itemQuantity to set
+	 */
+	public void setItemQuantity(int itemQuantity) {
+		this.itemQuantity = itemQuantity;
 	}
 }

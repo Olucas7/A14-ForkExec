@@ -5,15 +5,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.forkexec.hub.domain.exceptions.NotEnoughPointsException;
 import com.forkexec.hub.domain.exceptions.EmptyCartException;
 import com.forkexec.hub.domain.exceptions.InvalidCartItemIdException;
 import com.forkexec.hub.domain.exceptions.InvalidUserIdException;
 import com.forkexec.pts.ws.InvalidEmailFault_Exception;
+import com.forkexec.pts.ws.InvalidPointsFault_Exception;
+import com.forkexec.pts.ws.NotEnoughBalanceFault_Exception;
 import com.forkexec.pts.ws.cli.PointsClient;
 import com.forkexec.pts.ws.cli.PointsClientException;
 import com.forkexec.rst.ws.BadMenuIdFault_Exception;
+import com.forkexec.rst.ws.BadQuantityFault_Exception;
+import com.forkexec.rst.ws.InsufficientQuantityFault_Exception;
 import com.forkexec.rst.ws.Menu;
 import com.forkexec.rst.ws.MenuId;
+import com.forkexec.rst.ws.MenuOrder;
 import com.forkexec.rst.ws.cli.RestaurantClient;
 import com.forkexec.rst.ws.cli.RestaurantClientException;
 
@@ -76,23 +82,93 @@ public class Hub {
 		return carts.get(userId).getItems();
 	}
 
-	public Cart orderCart(String userId) throws InvalidUserIdException, EmptyCartException {
+	public Cart orderCart(String userId) throws InvalidUserIdException, NotEnoughPointsException, EmptyCartException {
 		checkUserId(userId);
+
 		Cart cart = carts.get(userId);
+		Cart finalCart = new Cart(cart.getId());
+		int totalPrice = 0, userBalance = 0, finalPrice = 0;
+		Map<MealId, Meal> meals = new HashMap<MealId, Meal>();
+
 		if (cart == null || cart.size() == 0) {
 			throw new EmptyCartException();
 		}
-
 		/*
-		 * Passos: ir aos restaurantes calcular o preço total do cart ir ao pontos ve se
-		 * o utilizador tem saldo ir aos restaurantes encomendar as encomendas ir aos
-		 * pontos descontar o saldo
+		 * ir aos restaurantes calcular o preço total do cart
 		 */
-		for (RestaurantClient r : connectToRestaurants()) {
-			// r.orderMenu(meal, quant)
+		for (CartItem item : cart.getItems()) {
+			String rest = item.getMealId().getRestaurantId();
+			MenuId menuId = buildMenuId(item.getMealId());
+			Menu menu = null;
+			try {
+				menu = connectToRestaurant(rest).getMenu(menuId);
+			} catch (BadMenuIdFault_Exception e) {
+				/* Impossivel acontecer mas */
+				throw new RuntimeException();
+			}
+			Meal meal = buildMeal(menu);
+			meals.put(meal.getId(), meal);
+			totalPrice += meal.getPrice() * item.getItemQuantity();
 		}
 
-		return null;
+		/*
+		 * ir ao pontos ve se o utilizador tem saldo
+		 */
+
+		for (PointsClient p : connectToPoints()) {
+			try {
+				userBalance += p.pointsBalance(userId);
+			} catch (InvalidEmailFault_Exception e) {
+				throw new InvalidUserIdException();
+			}
+		}
+
+		if (totalPrice > userBalance) {
+			throw new NotEnoughPointsException();
+		}
+		/*
+		 * ir aos restaurantes encomendar as encomendas
+		 */
+
+		for (CartItem item : cart.getItems()) {
+			String rest = item.getMealId().getRestaurantId();
+			MenuId menuId = buildMenuId(item.getMealId());
+			MenuOrder menuOrder = null;
+			try {
+				menuOrder = connectToRestaurant(rest).orderMenu(menuId, item.getItemQuantity());
+			} catch (BadMenuIdFault_Exception e) {
+				/* Impossivel acontecer mas */
+				throw new RuntimeException();
+			} catch (BadQuantityFault_Exception e) {
+				/* Impossivel acontecer mas */
+				throw new RuntimeException();
+			} catch (InsufficientQuantityFault_Exception e) {
+				continue;
+			}
+			/* Constroi cart */
+			CartItem cartItem = buildCartItem(menuOrder);
+			cartItem.getMealId().setRestaurantId(rest);
+			finalCart.getItems().add(cartItem);
+			/* Calcula preco */
+			finalPrice += meals.get(cartItem.getMealId()).getPrice() * item.getItemQuantity();
+		}
+		/*
+		 * ir aos pontos descontar o saldo
+		 */
+		for (PointsClient p : connectToPoints()) {
+			try {
+				p.spendPoints(userId, finalPrice);
+			} catch (InvalidEmailFault_Exception e) {
+				throw new InvalidUserIdException();
+			} catch (InvalidPointsFault_Exception e) {
+				/* Impossivel acontecer mas */
+				throw new RuntimeException();
+			} catch (NotEnoughBalanceFault_Exception e) {
+				throw new NotEnoughPointsException();
+			}
+		}
+
+		return finalCart;
 	}
 
 	/* ------------------- VERIFICADORES ------------------- */
@@ -190,6 +266,19 @@ public class Hub {
 		meal.setPrice(menu.getPrice());
 		meal.setPreparationTime(menu.getPreparationTime());
 		return meal;
+	}
+
+	private MenuId buildMenuId(MealId mealId) {
+		MenuId menuId = new MenuId();
+		menuId.setId(mealId.getMealId());
+		return menuId;
+	}
+
+	private CartItem buildCartItem(MenuOrder menuOrder) {
+		MealId mealId = new MealId();
+		mealId.setMealId(menuOrder.getMenuId().getId());
+		CartItem cartItem = new CartItem(mealId, menuOrder.getMenuQuantity());
+		return cartItem;
 	}
 
 }

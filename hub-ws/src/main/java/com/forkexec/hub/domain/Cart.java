@@ -11,6 +11,10 @@ public class Cart {
 		this.id = Integer.toString(id);
 	}
 
+	public Cart(String id) {
+		this.id = id;
+	}
+
 	public void addToCart(CartItem cartItem) {
 		int index = items.indexOf(cartItem);
 		if (index != -1) {
