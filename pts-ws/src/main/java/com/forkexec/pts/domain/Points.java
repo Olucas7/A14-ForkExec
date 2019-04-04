@@ -25,14 +25,14 @@ public class Points {
     private final AtomicInteger initialBalance = new AtomicInteger(DEFAULT_INITIAL_BALANCE);
 
     // database for users and points
-    private static Map<String,AtomicInteger> database = new HashMap<String,AtomicInteger>();
+    private static Map<String, AtomicInteger> database = new HashMap<String, AtomicInteger>();
 
     // Singleton -------------------------------------------------------------
 
     /**
      * Private constructor prevents instantiation from other classes.
      */
-    private Points() {   
+    private Points() {
     }
 
     /**
@@ -47,40 +47,38 @@ public class Points {
         return SingletonHolder.INSTANCE;
     }
 
-	public synchronized  void registerEmail(String userEmail) throws EmailAlreadyExistsException {
-        String message = "Email already exists";
-        if(database.containsKey(userEmail))
-            throw new EmailAlreadyExistsException(message);
+    public synchronized void registerEmail(String userEmail) throws EmailAlreadyExistsException {
+        if (database.containsKey(userEmail))
+            throw new EmailAlreadyExistsException();
 
         database.put(userEmail, initialBalance);
-	}
+    }
 
-	public synchronized int getBalance(String userEmail) throws InvalidEmailException{
+    public synchronized int getBalance(String userEmail) throws InvalidEmailException {
 
-        if(!(database.containsKey(userEmail)))
-            throw new InvalidEmailException("Email doesn't exist");
+        if (!(database.containsKey(userEmail)))
+            throw new InvalidEmailException();
         AtomicInteger balance = database.get(userEmail);
-		return balance.intValue();
-	}
+        return balance.intValue();
+    }
 
-    public synchronized int deltaBalance(String userEmail,int deltaPoints) throws NotEnoughBalanceException, InvalidEmailException{
-        String message = "Not enough balance";
-        if(!(database.containsKey(userEmail)))
-            throw new InvalidEmailException("Email doesn't exist");
-        if(database.get(userEmail).addAndGet(deltaPoints) < 0)
-            throw new NotEnoughBalanceException(message);
+    public synchronized int deltaBalance(String userEmail, int deltaPoints)
+            throws NotEnoughBalanceException, InvalidEmailException {
+        if (!(database.containsKey(userEmail)))
+            throw new InvalidEmailException();
+        if (database.get(userEmail).addAndGet(deltaPoints) < 0)
+            throw new NotEnoughBalanceException();
         return database.get(userEmail).addAndGet(deltaPoints);
     }
 
     public synchronized void reset() {
-        database.clear(); 
+        database.clear();
         initialBalance.set(DEFAULT_INITIAL_BALANCE);
-   }
+    }
 
-	public synchronized void init(int startPoints) {
+    public synchronized void init(int startPoints) {
         initialBalance.set(startPoints);
-           
-        }
+
+    }
 
 }
-    

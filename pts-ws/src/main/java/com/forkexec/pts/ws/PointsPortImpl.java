@@ -36,7 +36,7 @@ public class PointsPortImpl implements PointsPortType {
             Points psingleton = Points.getInstance();
             psingleton.registerEmail(userEmail);
         } catch (EmailAlreadyExistsException e) {
-            throw new EmailAlreadyExistsFault_Exception("Email already exists", new EmailAlreadyExistsFault());
+            EmailAlreadyExists(e.getMessage());
         }
     }
 
@@ -46,40 +46,38 @@ public class PointsPortImpl implements PointsPortType {
         try {
             return Points.getInstance().getBalance(userEmail);
         } catch (InvalidEmailException e) {
-            InvalidEmailFault("email doesn't exist");
+            InvalidEmailFault(e.getMessage());
         }
         return 0;
     }
 
     @Override
     public int addPoints(final String userEmail, final int pointsToAdd)
-	    throws InvalidEmailFault_Exception, InvalidPointsFault_Exception{
-        try{
+            throws InvalidEmailFault_Exception, InvalidPointsFault_Exception {
+        try {
             checkEmail(userEmail);
             checkPoints(pointsToAdd);
-            return Points.getInstance().deltaBalance(userEmail,pointsToAdd);
+            return Points.getInstance().deltaBalance(userEmail, pointsToAdd);
 
-            }catch(NotEnoughBalanceException e ){
-            }   
-            catch(InvalidEmailException e){
-                InvalidEmailFault("email doesn't exist");
-            }
-        return 0;
-        }
-        
+        } catch (NotEnoughBalanceException e) {
             
+        } catch (InvalidEmailException e) {
+            InvalidEmailFault(e.getMessage());
+        }
+        return 0;
+    }
+
     @Override
     public int spendPoints(final String userEmail, final int pointsToSpend)
-	    throws InvalidEmailFault_Exception, InvalidPointsFault_Exception, NotEnoughBalanceFault_Exception {
-        try{
-        checkEmail(userEmail);
-        checkPoints(pointsToSpend);
-        return Points.getInstance().deltaBalance(userEmail,-pointsToSpend);
-        }catch(NotEnoughBalanceException e){
-            NotEnoughBalanceFault("Not enough balance");
-        }
-        catch(InvalidEmailException e){
-            InvalidEmailFault("email doesn't exist");
+            throws InvalidEmailFault_Exception, InvalidPointsFault_Exception, NotEnoughBalanceFault_Exception {
+        try {
+            checkEmail(userEmail);
+            checkPoints(pointsToSpend);
+            return Points.getInstance().deltaBalance(userEmail, -pointsToSpend);
+        } catch (NotEnoughBalanceException e) {
+            NotEnoughBalanceFault(e.getMessage());
+        } catch (InvalidEmailException e) {
+            InvalidEmailFault(e.getMessage());
         }
         return 0;
     }
@@ -88,20 +86,20 @@ public class PointsPortImpl implements PointsPortType {
     /** Diagnostic operation to check if service is running. */
     @Override
     public String ctrlPing(String inputMessage) {
-	// If no input is received, return a default name.
-	if (inputMessage == null || inputMessage.trim().length() == 0)
-	    inputMessage = "friend";
+        // If no input is received, return a default name.
+        if (inputMessage == null || inputMessage.trim().length() == 0)
+            inputMessage = "friend";
 
-	// If the park does not have a name, return a default.
-	String wsName = endpointManager.getWsName();
-	if (wsName == null || wsName.trim().length() == 0)
-	    wsName = "Park";
+        // If the park does not have a name, return a default.
+        String wsName = endpointManager.getWsName();
+        if (wsName == null || wsName.trim().length() == 0)
+            wsName = "Park";
 
-	// Build a string with a message to return.
-	final StringBuilder builder = new StringBuilder();
-	builder.append("Hello ").append(inputMessage);
-	builder.append(" from ").append(wsName);
-	return builder.toString();
+        // Build a string with a message to return.
+        final StringBuilder builder = new StringBuilder();
+        builder.append("Hello ").append(inputMessage);
+        builder.append(" from ").append(wsName);
+        return builder.toString();
     }
 
     /** Return all variables to default values. */
@@ -113,32 +111,31 @@ public class PointsPortImpl implements PointsPortType {
     /** Set variables with specific values. */
     @Override
     public void ctrlInit(final int startPoints) throws BadInitFault_Exception {
-        if(startPoints < 1)
+        if (startPoints < 1)
             throwBadInit("Bad init value!");
         Points.getInstance().init(startPoints);
     }
 
     // Aux functions --------------------------------------------------------
 
-    public void checkEmail(String userEmail) throws InvalidEmailFault_Exception{
-       
+    public void checkEmail(String userEmail) throws InvalidEmailFault_Exception {
+
         String message_null = "null email address";
         String message_invalid = "Not a valid email address";
 
-
-        if (userEmail == null ) 
+        if (userEmail == null)
             InvalidEmailFault(message_null);
 
         String regex = "^(.+)@(.+)$";
         Pattern pattern = Pattern.compile(regex);
         Matcher mat = pattern.matcher(userEmail);
-        if(!mat.matches())
+        if (!mat.matches())
             InvalidEmailFault(message_invalid);
     }
 
-    public void checkPoints(int points) throws InvalidPointsFault_Exception{
+    public void checkPoints(int points) throws InvalidPointsFault_Exception {
         String message_points = "Not a valid number of points";
-        if(points < 1)
+        if (points < 1)
             InvalidPointsFault(message_points);
 
     }
@@ -151,11 +148,13 @@ public class PointsPortImpl implements PointsPortType {
         faultInfo.message = message;
         throw new BadInitFault_Exception(message, faultInfo);
     }
+
     private void InvalidEmailFault(final String message) throws InvalidEmailFault_Exception {
         final InvalidEmailFault faultInfo = new InvalidEmailFault();
         faultInfo.message = message;
         throw new InvalidEmailFault_Exception(message, faultInfo);
     }
+
     private void InvalidPointsFault(final String message) throws InvalidPointsFault_Exception {
         final InvalidPointsFault faultInfo = new InvalidPointsFault();
         faultInfo.message = message;
@@ -168,5 +167,10 @@ public class PointsPortImpl implements PointsPortType {
         throw new NotEnoughBalanceFault_Exception(message, faultInfo);
     }
 
-   
+    private void EmailAlreadyExists(final String message) throws EmailAlreadyExistsFault_Exception {
+        final EmailAlreadyExistsFault faultInfo = new EmailAlreadyExistsFault();
+        faultInfo.message = message;
+        throw new EmailAlreadyExistsFault_Exception(message, faultInfo);
+    }
+
 }

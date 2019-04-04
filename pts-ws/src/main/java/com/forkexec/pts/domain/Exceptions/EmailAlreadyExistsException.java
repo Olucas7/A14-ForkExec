@@ -1,12 +1,11 @@
 package com.forkexec.pts.domain.Exceptions;
 
 public class EmailAlreadyExistsException extends Exception {
-    private static final long serialVersionUID = 1L;
-    
-    public EmailAlreadyExistsException() {
+    private final String MESSAGE = "Email already exists";
+
+    @Override
+    public String getMessage() {
+        return MESSAGE;
     }
-    
-    public EmailAlreadyExistsException(String message) {
-        super(message);
-    }
+
 }

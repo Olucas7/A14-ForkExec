@@ -1,12 +1,9 @@
 package com.forkexec.pts.domain.Exceptions;
-
 public class NotEnoughBalanceException extends Exception {
-    private static final long serialVersionUID = 1L;
-    
-    public NotEnoughBalanceException() {
-    }
-    
-    public NotEnoughBalanceException(String message) {
-        super(message);
-    }
+	private final String MESSAGE = "not enough balance";
+
+	@Override
+	public String getMessage() {
+		return MESSAGE;
+	}
 }
