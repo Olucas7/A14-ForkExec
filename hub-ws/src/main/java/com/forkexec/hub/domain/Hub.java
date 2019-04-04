@@ -68,6 +68,19 @@ public class Hub {
 		uddi = uddiNaming;
 	}
 
+	public void chargeAccount(String userId, int moneyToAdd, String creditCardNumber) throws InvalidUserIdException {
+		checkUserId(userId);
+
+		int pointsToAdd = convertMoneyToPoints(moneyToAdd);
+		for (PointsClient points : connectToPoints()) {
+			points.addPoints(userId, pointsToAdd);
+		}
+	}
+
+	private int convertMoneyToPoints(int moneyToAdd) {
+		return 0;
+	}
+
 	public void activateAccount(String userId) throws InvalidUserIdException {
 		try {
 			for (PointsClient pointsClient : connectToPoints()) {
@@ -145,7 +158,7 @@ public class Hub {
 				menu = connectToRestaurant(rest).getMenu(menuId);
 			} catch (BadMenuIdFault_Exception e) {
 				/* Impossivel acontecer mas */
-				throw new RuntimeException();
+				throw new RuntimeException(e);
 			}
 			Meal meal = buildMeal(menu);
 			meals.put(meal.getId(), meal);
@@ -179,10 +192,10 @@ public class Hub {
 				menuOrder = connectToRestaurant(rest).orderMenu(menuId, item.getItemQuantity());
 			} catch (BadMenuIdFault_Exception e) {
 				/* Impossivel acontecer mas */
-				throw new RuntimeException();
+				throw new RuntimeException(e);
 			} catch (BadQuantityFault_Exception e) {
 				/* Impossivel acontecer mas */
-				throw new RuntimeException();
+				throw new RuntimeException(e);
 			} catch (InsufficientQuantityFault_Exception e) {
 				continue;
 			}
@@ -203,7 +216,7 @@ public class Hub {
 				throw new InvalidUserIdException();
 			} catch (InvalidPointsFault_Exception e) {
 				/* Impossivel acontecer mas */
-				throw new RuntimeException();
+				throw new RuntimeException(e);
 			} catch (NotEnoughBalanceFault_Exception e) {
 				throw new NotEnoughPointsException();
 			}
