@@ -55,6 +55,11 @@
         	<artifactId>pts-ws-cli</artifactId>
         	<version>1.0.0-SNAPSHOT</version>
     	</dependency>
+		<dependency>
+        	<groupId>com.forkexec.A14</groupId>
+        	<artifactId>cc-ws-cli</artifactId>
+        	<version>1.0.0-SNAPSHOT</version>
+    	</dependency>
 	</dependencies>
 
 	<build>
