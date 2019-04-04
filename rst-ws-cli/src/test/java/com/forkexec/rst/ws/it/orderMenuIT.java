@@ -30,8 +30,8 @@ public class orderMenuIT extends BaseIT {
         ok_id_menu.setId("10");
         menu.setId(ok_id_menu);
         menu.setPrice(5);
-        menu.setDessert("mousse_de_chocolate");
-        menu.setEntree("beringela_recheada");
+        menu.setDessert("mousse de chocolate");
+        menu.setEntree("beringela recheada");
         menu.setPlate("tofu");
         menu.setPreparationTime(10);
         menu_init.setMenu(menu);
@@ -45,8 +45,8 @@ public class orderMenuIT extends BaseIT {
         assertEquals("10", menu.getId().getId());
         assertEquals(50, menu_init.getQuantity());
         assertEquals(5, menu.getPrice());
-        assertEquals("mousse_de_chocolate", menu.getDessert());
-        assertEquals("beringela_recheada", menu.getEntree());
+        assertEquals("mousse de chocolate", menu.getDessert());
+        assertEquals("beringela recheada", menu.getEntree());
         assertEquals("tofu", menu.getPlate());
         assertEquals(10, menu.getPreparationTime());
         assertEquals(50, menu_init.getQuantity());
