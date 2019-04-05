@@ -1,5 +1,7 @@
 package com.forkexec.hub.ws.it;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +39,8 @@ public class GetFoodIT extends BaseIT {
         client.ctrlInitFood(foods);
     }
 
-    // NÃO HOVE TEMPO PARA MAIS ;(
+    /*
+     * public void success() { assertEquals("10", food.getId().getMenuId()); }
+     */
 
 }
