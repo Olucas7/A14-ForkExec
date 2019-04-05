@@ -101,8 +101,14 @@ public class RestaurantPortImpl implements RestaurantPortType {
 	}
 
 	private boolean isValidMenu(Menu menu) {
-		return menu.getPrice() > 0 && menu.getPreparationTime() > 0 && validString(menu.getEntree())
-				&& validString(menu.getPlate()) && validString(menu.getDessert());
+		return menu.getPrice() > 0 && menu.getPreparationTime() > 0 && validStringFood(menu.getEntree())
+				&& validStringFood(menu.getPlate()) && validStringFood(menu.getDessert());
+	}
+
+	private boolean validStringFood(String food) {
+		if (food == null || food.trim().length() == 0)
+			return false;
+		return true;
 	}
 
 	// Control operations ----------------------------------------------------
@@ -165,7 +171,7 @@ public class RestaurantPortImpl implements RestaurantPortType {
 				Carte c = convertMenuInitToCarte(menu_info);
 				cartes.add(c);
 			} else {
-				throwBadInit("invalid menu init");
+				throwBadInit("invalid menu init " + menu_info.getMenu().getId());
 			}
 		}
 		return cartes;

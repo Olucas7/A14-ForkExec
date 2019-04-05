@@ -24,7 +24,7 @@ public class orderMenuIT extends BaseIT {
     private MenuId null_id_menu = new MenuId();
     private MenuId spaced_id_menu = new MenuId();
     private MenuId non_existing_id_menu = new MenuId();
-    
+
     private MenuOrder new_order = new MenuOrder();
 
     @Before
@@ -32,8 +32,8 @@ public class orderMenuIT extends BaseIT {
         ok_id_menu.setId("10");
         menu.setId(ok_id_menu);
         menu.setPrice(5);
-        menu.setDessert("mousse_de_chocolate");
-        menu.setEntree("beringela_recheada");
+        menu.setDessert("mousse de chocolate");
+        menu.setEntree("beringela recheada");
         menu.setPlate("tofu");
         menu.setPreparationTime(10);
         menu_init.setMenu(menu);
@@ -43,60 +43,68 @@ public class orderMenuIT extends BaseIT {
     }
 
     @Test
-    public void success() throws BadMenuIdFault_Exception,BadQuantityFault_Exception,InsufficientQuantityFault_Exception{
+    public void success()
+            throws BadMenuIdFault_Exception, BadQuantityFault_Exception, InsufficientQuantityFault_Exception {
         assertEquals("10", menu.getId().getId());
         assertEquals(50, menu_init.getQuantity());
         assertEquals(5, menu.getPrice());
-        assertEquals("mousse_de_chocolate", menu.getDessert());
-        assertEquals("beringela_recheada", menu.getEntree());
+        assertEquals("mousse de chocolate", menu.getDessert());
+        assertEquals("beringela recheada", menu.getEntree());
         assertEquals("tofu", menu.getPlate());
         assertEquals(10, menu.getPreparationTime());
         assertEquals(50, menu_init.getQuantity());
-        new_order = client.orderMenu(ok_id_menu,50);
-        assertEquals(50,new_order.getMenuQuantity());
-        assertEquals("10",new_order.getMenuId().getId());
-        
+        new_order = client.orderMenu(ok_id_menu, 50);
+        assertEquals(50, new_order.getMenuQuantity());
+        assertEquals("10", new_order.getMenuId().getId());
+
     }
 
     @Test(expected = BadMenuIdFault_Exception.class)
-    public void blankId() throws BadMenuIdFault_Exception, BadQuantityFault_Exception, InsufficientQuantityFault_Exception {
+    public void blankId()
+            throws BadMenuIdFault_Exception, BadQuantityFault_Exception, InsufficientQuantityFault_Exception {
         empty_id_menu.setId(null);
-        client.orderMenu(empty_id_menu,50);
+        client.orderMenu(empty_id_menu, 50);
 
     }
 
     @Test(expected = BadMenuIdFault_Exception.class)
-    public void null_id() throws BadMenuIdFault_Exception, BadQuantityFault_Exception, InsufficientQuantityFault_Exception {
+    public void null_id()
+            throws BadMenuIdFault_Exception, BadQuantityFault_Exception, InsufficientQuantityFault_Exception {
         null_id_menu.setId(null);
-        client.orderMenu(null_id_menu,50);
+        client.orderMenu(null_id_menu, 50);
     }
 
     @Test(expected = BadMenuIdFault_Exception.class)
-    public void spaced_id_menu() throws BadMenuIdFault_Exception, BadQuantityFault_Exception, InsufficientQuantityFault_Exception {
+    public void spaced_id_menu()
+            throws BadMenuIdFault_Exception, BadQuantityFault_Exception, InsufficientQuantityFault_Exception {
         spaced_id_menu.setId("6 9");
-        client.orderMenu(spaced_id_menu,50);
+        client.orderMenu(spaced_id_menu, 50);
     }
 
     @Test(expected = BadMenuIdFault_Exception.class)
-    public void nonExistingId() throws BadMenuIdFault_Exception, BadQuantityFault_Exception, InsufficientQuantityFault_Exception {
+    public void nonExistingId()
+            throws BadMenuIdFault_Exception, BadQuantityFault_Exception, InsufficientQuantityFault_Exception {
         non_existing_id_menu.setId("8");
-        client.orderMenu(non_existing_id_menu,50);
+        client.orderMenu(non_existing_id_menu, 50);
     }
 
     @Test(expected = BadQuantityFault_Exception.class)
-    public void negativeQuantity() throws BadQuantityFault_Exception, BadMenuIdFault_Exception, InsufficientQuantityFault_Exception {
-        client.orderMenu(ok_id_menu,-2);
+    public void negativeQuantity()
+            throws BadQuantityFault_Exception, BadMenuIdFault_Exception, InsufficientQuantityFault_Exception {
+        client.orderMenu(ok_id_menu, -2);
     }
 
     @Test(expected = BadQuantityFault_Exception.class)
-    public void nullQuantity() throws BadQuantityFault_Exception, BadMenuIdFault_Exception, InsufficientQuantityFault_Exception {
-        client.orderMenu(ok_id_menu,0);
+    public void nullQuantity()
+            throws BadQuantityFault_Exception, BadMenuIdFault_Exception, InsufficientQuantityFault_Exception {
+        client.orderMenu(ok_id_menu, 0);
     }
 
     @Test(expected = InsufficientQuantityFault_Exception.class)
-    public void insufficientQuantity() throws InsufficientQuantityFault_Exception, BadMenuIdFault_Exception, BadQuantityFault_Exception {
+    public void insufficientQuantity()
+            throws InsufficientQuantityFault_Exception, BadMenuIdFault_Exception, BadQuantityFault_Exception {
         non_existing_id_menu.setId("8");
-        client.orderMenu(ok_id_menu,70);
+        client.orderMenu(ok_id_menu, 70);
     }
 
     @After
@@ -105,9 +113,3 @@ public class orderMenuIT extends BaseIT {
     }
 
 }
-
-
-
-
-
-

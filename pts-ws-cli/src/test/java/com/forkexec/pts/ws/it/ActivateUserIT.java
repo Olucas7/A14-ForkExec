@@ -13,29 +13,20 @@ import org.junit.Test;
  */
 public class ActivateUserIT extends BaseIT {
 
-	private final String VALID_EMAIL = "joao.barata@tecnico.pt";
-	private final String NULL_EMAIL = null;
-	private final String NO_AT_EMAIL = "joao.baratatecnico.pt";
-	private final String EMPTY_EMAIL = "";
-	private final String NO_USER_EMAIL = "@tecnico.pt";
-	private final String NO_DOMAIN_EMAIL = "velhinho@";
-	private final String NO_USER_DOMAIN_EMAIL = "@";
-	private final int STARTPOINTS = 500;
-
 	@Test
 	public void success()
 			throws EmailAlreadyExistsFault_Exception, InvalidEmailFault_Exception, BadInitFault_Exception {
 		client.ctrlInit(STARTPOINTS);
 
-		client.activateUser(VALID_EMAIL);
-		assertEquals(STARTPOINTS, client.pointsBalance(VALID_EMAIL));
+		client.activateUser(VALID_EMAIL_1);
+		assertEquals(STARTPOINTS, client.pointsBalance(VALID_EMAIL_1));
 	}
 
 	// Testing emails
 	// -------------------------------------------------------------------------
 	@Test(expected = EmailAlreadyExistsFault_Exception.class)
 	public void alreadyExistsEmailTest() throws InvalidEmailFault_Exception, EmailAlreadyExistsFault_Exception {
-		client.activateUser(VALID_EMAIL);
+		client.activateUser(VALID_EMAIL_1);
 	}
 
 	@Test(expected = InvalidEmailFault_Exception.class)

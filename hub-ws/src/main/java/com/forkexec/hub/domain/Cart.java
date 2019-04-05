@@ -1,5 +1,6 @@
 package com.forkexec.hub.domain;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -8,10 +9,12 @@ public class Cart {
 	private List<CartItem> items;
 
 	public Cart(int id) {
+		items = new ArrayList<CartItem>();
 		this.id = Integer.toString(id);
 	}
 
 	public Cart(String id) {
+		items = new ArrayList<CartItem>();
 		this.id = id;
 	}
 
