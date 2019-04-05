@@ -306,19 +306,7 @@ public class HubPortImpl implements HubPortType {
 	}
 
 	// View helpers ----------------------------------------------------------
-
-	/** Helper to convert a domain object to a view. */
-	private Food buildFood(Menu menu) {
-		Food food = new Food();
-		food.setId(new FoodId());
-		food.getId().setMenuId(menu.getId().getId());
-		food.setEntree(menu.getEntree());
-		food.setPlate(menu.getPlate());
-		food.setDessert(menu.getDessert());
-		food.setPrice(menu.getPrice());
-		food.setPreparationTime(menu.getPreparationTime());
-		return food;
-	}
+	/** Helpers to convert a domain object to a view. */
 
 	private MealId buildMealId(FoodId id) {
 		MealId cid = new MealId();

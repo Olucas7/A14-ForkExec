@@ -13,14 +13,12 @@ import org.junit.Test;
 
 public class SearchHungryIT extends BaseIT {
 
-	private String RESTAURANT1 = "A14_Restaurant1";
-	private String RESTAURANT2 = "A14_Restaurant2";
 	private Food food1;
 	private Food food2;
 	private List<FoodInit> initialFoods;
 
 	@Before
-	public void setupTest() throws InvalidInitFault_Exception {
+	public void setUp() throws InvalidInitFault_Exception {
 		initialFoods = new ArrayList<FoodInit>();
 		FoodInit foodInit1 = new FoodInit();
 		food1 = new Food();
@@ -59,7 +57,7 @@ public class SearchHungryIT extends BaseIT {
 	}
 
 	@After
-	public void clean() {
+	public void tearDown() {
 		client.ctrlClear();
 	}
 

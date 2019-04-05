@@ -13,22 +13,14 @@ import org.junit.Test;
  * Class that tests activateAccount operation
  */
 public class ActivateAccountIT extends BaseIT {
-	private final String VALID_EMAIL = "joao.barata@tecnico.pt";
-	private final String NULL_EMAIL = null;
-	private final String NO_AT_EMAIL = "joao.baratatecnico.pt";
-	private final String EMPTY_EMAIL = "";
-	private final String NO_USER_EMAIL = "@tecnico.pt";
-	private final String NO_DOMAIN_EMAIL = "velhinho@";
-	private final String NO_USER_DOMAIN_EMAIL = "@";
-	private final int INITIAL_BALANCE = 100;
 
 	@Before
-	public void setupTest() throws InvalidInitFault_Exception {
+	public void setUp() throws InvalidInitFault_Exception {
 		client.ctrlInitUserPoints(INITIAL_BALANCE);
 	}
 
 	@After
-	public void clean() {
+	public void tearDown() {
 		client.ctrlClear();
 	}
 

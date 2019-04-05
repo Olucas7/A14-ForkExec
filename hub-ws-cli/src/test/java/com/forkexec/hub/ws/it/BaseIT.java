@@ -18,6 +18,17 @@ public class BaseIT {
 
 	protected static HubClient client;
 
+	protected final String VALID_EMAIL = "joao.barata@tecnico.pt";
+	protected final String NULL_EMAIL = null;
+	protected final String NO_AT_EMAIL = "joao.baratatecnico.pt";
+	protected final String EMPTY_EMAIL = "";
+	protected final String NO_USER_EMAIL = "@tecnico.pt";
+	protected final String NO_DOMAIN_EMAIL = "velhinho@";
+	protected final String NO_USER_DOMAIN_EMAIL = "@";
+	protected final int INITIAL_BALANCE = 100;
+	protected final String RESTAURANT1 = "A14_Restaurant1";
+	protected final String RESTAURANT2 = "A14_Restaurant2";
+
 	@BeforeClass
 	public static void oneTimeSetup() throws Exception {
 		testProps = new Properties();
