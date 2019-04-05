@@ -18,6 +18,12 @@ public class BaseIT {
 
 	protected static CreditCardClient client;
 
+	protected final String VALID_NUMBER = "4024007102923926";
+	protected final String INVALID_NUMBER = "123456";
+	protected final String NULL_CREDIT_CARD = null;
+	protected final String SPACED_CREDIT_CARD = "40240 07102 923926";
+	protected final String EMPTY_CREDIT_CARD = "";
+
 	@BeforeClass
 	public static void oneTimeSetup() throws Exception {
 		testProps = new Properties();
