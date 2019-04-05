@@ -66,9 +66,11 @@ public class Points {
             throws NotEnoughBalanceException, InvalidEmailException {
         if (!(database.containsKey(userEmail)))
             throw new InvalidEmailException();
-        if (database.get(userEmail).addAndGet(deltaPoints) < 0)
+        int points = database.get(userEmail).addAndGet(deltaPoints);
+        if (points < 0)
             throw new NotEnoughBalanceException();
-        return database.get(userEmail).addAndGet(deltaPoints);
+
+        return points;
     }
 
     public synchronized void reset() {

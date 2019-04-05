@@ -33,12 +33,13 @@ public class BaseIT {
 	protected final String RESTAURANT2 = "A14_Restaurant2";
 
 	protected final String VALID_NUMBER = "4024007102923926";
-	protected final String INVALID_NUMBER ="123456";
+	protected final String INVALID_NUMBER = "123456";
 	protected final String NULL_CREDIT_CARD = null;
-	protected final String SPACED_CREDIT_CARD ="40240 07102 923926";
-	protected final String EMPTY_CREDIT_CARD ="";
+	protected final String SPACED_CREDIT_CARD = "40240 07102 923926";
+	protected final String EMPTY_CREDIT_CARD = "";
 	protected final int VALID_MONEY = 50;
 	protected final int INVALID_MONEY = 80;
+	protected final int NEGATIVE_MONEY = -1;
 
 	protected Food food1;
 	protected Food food2;
@@ -47,7 +48,6 @@ public class BaseIT {
 	protected FoodInit foodInit1;
 	protected FoodInit foodInit2;
 	protected List<FoodInit> initialFoods;
-
 
 	@BeforeClass
 	public static void oneTimeSetup() throws Exception {

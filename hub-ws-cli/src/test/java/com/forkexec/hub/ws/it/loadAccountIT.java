@@ -18,7 +18,8 @@ import org.junit.Test;
 public class loadAccountIT extends BaseIT {
 
     @Before
-    public void setUp() throws InvalidInitFault_Exception {
+    public void setUp() throws InvalidInitFault_Exception, InvalidUserIdFault_Exception {
+        client.activateAccount(VALID_EMAIL);
         client.ctrlInitUserPoints(INITIAL_BALANCE);
     }
 
@@ -30,7 +31,7 @@ public class loadAccountIT extends BaseIT {
     @Test
     public void success()
             throws InvalidUserIdFault_Exception, InvalidMoneyFault_Exception, InvalidCreditCardFault_Exception {
-        client.activateAccount(VALID_EMAIL);
+
         assertEquals(INITIAL_BALANCE, client.accountBalance(VALID_EMAIL));
         client.loadAccount(VALID_EMAIL, VALID_MONEY, VALID_NUMBER);
         assertEquals(5600, client.accountBalance(VALID_EMAIL));
@@ -91,11 +92,22 @@ public class loadAccountIT extends BaseIT {
         client.loadAccount(VALID_EMAIL, VALID_MONEY, SPACED_CREDIT_CARD);
     }
 
-    @Test(expected = InvalidMoneyFault_Exception.class)
+    @Test(expected = InvalidCreditCardFault_Exception.class)
     public void emptyNumber()
             throws InvalidMoneyFault_Exception, InvalidUserIdFault_Exception, InvalidCreditCardFault_Exception {
-        client.loadAccount(VALID_EMAIL, INVALID_MONEY, EMPTY_CREDIT_CARD);
+        client.loadAccount(VALID_EMAIL, VALID_MONEY, EMPTY_CREDIT_CARD);
     }
 
+    @Test(expected = InvalidMoneyFault_Exception.class)
+    public void invalidMoney()
+            throws InvalidMoneyFault_Exception, InvalidUserIdFault_Exception, InvalidCreditCardFault_Exception {
+        client.loadAccount(VALID_EMAIL, INVALID_MONEY, VALID_NUMBER);
+    }
+
+    @Test(expected = InvalidMoneyFault_Exception.class)
+    public void negativeMoney()
+            throws InvalidMoneyFault_Exception, InvalidUserIdFault_Exception, InvalidCreditCardFault_Exception {
+        client.loadAccount(VALID_EMAIL, NEGATIVE_MONEY, VALID_NUMBER);
+    }
 
 }

@@ -1,8 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<!-- http://maven.apache.org/pom.html#Quick_Overview -->
-
 	<parent>
 		<groupId>com.forkexec.A14</groupId>
 		<artifactId>ForkExec</artifactId>
@@ -12,19 +10,17 @@
 	<packaging>jar</packaging>
 	<name>${project.artifactId}</name>
 	<properties>
-
+		<!-- see parent POM for more properties -->
+		<mainclass>com.forkexec.cc.ws.cli.ccClientApp</mainclass>
 		<wsdl.dir>${basedir}/../cc-contract/</wsdl.dir>
 		<!-- instance number -->
 		<ws.i>1</ws.i>
 		<ws.host>ws.sd.rnl.tecnico.ulisboa.pt</ws.host>
 		<ws.port>8080</ws.port>
-
 		<ws.url>http://${ws.host}:${ws.port}/cc</ws.url>
-
 	</properties>
 	<dependencies>
 		<!-- JAX-WS -->
-
 		<dependency>
 			<groupId>com.sun.xml.ws</groupId>
 			<artifactId>jaxws-rt</artifactId>
@@ -81,7 +77,6 @@
 				</executions>
 				<configuration>
 					<!-- http://www.mojohaus.org/jaxws-maven-plugin/wsimport-mojo.html -->
-
 					<wsdlDirectory>${wsdl.dir}</wsdlDirectory>
 				</configuration>
 				<dependencies>
@@ -118,6 +113,11 @@
 				<configuration>
 					<!-- to prevent deprecation warning: -->
 					<killAfter>-1</killAfter>
+					<mainClass>${mainclass}</mainClass>
+					<arguments>
+						<argument>${uddi.url}</argument>
+						<argument>${ws.name}</argument>
+					</arguments>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -135,6 +135,7 @@
 				<configuration>
 					<programs>
 						<program>
+							<mainClass>${mainclass}</mainClass>
 							<id>${project.artifactId}</id>
 						</program>
 					</programs>

@@ -3,8 +3,6 @@ package com.forkexec.hub.ws;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.jws.WebService;
@@ -295,12 +293,6 @@ public class HubPortImpl implements HubPortType {
 
 	public boolean validString(String message) {
 		if (message == null || message.trim().length() == 0)
-			return false;
-
-		String regex = "\\s";
-		Pattern pattern = Pattern.compile(regex);
-		Matcher mat = pattern.matcher(message);
-		if (mat.matches()) // contains white spaces
 			return false;
 		return true;
 	}

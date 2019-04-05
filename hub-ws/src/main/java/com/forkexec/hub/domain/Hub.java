@@ -74,14 +74,17 @@ public class Hub {
 
 	public synchronized void chargeAccount(String userId, int moneyToAdd, String creditCardNumber)
 			throws InvalidUserIdException, InvalidPointsException, InvalidCardNumberException {
-		checkUserId(userId);
+		System.out.println("USER ID AINDA N PASSOU " + userId);
 
+		checkUserId(userId);
+		System.out.println("USER ID PASSOU " + userId);
 		CreditCardClient creditCard = connectToCreditCard();
 		if (!(creditCard.validateNumber(creditCardNumber)))
 			throw new InvalidCardNumberException();
 		int pointsToAdd = convertMoneyToPoints(moneyToAdd);
 		for (PointsClient points : connectToPoints()) {
 			try {
+
 				points.addPoints(userId, pointsToAdd);
 			} catch (InvalidEmailFault_Exception e) {
 				throw new InvalidUserIdException();
@@ -94,7 +97,7 @@ public class Hub {
 	private synchronized int convertMoneyToPoints(int moneyToAdd) throws InvalidPointsException {
 		switch (moneyToAdd) {
 		case 10:
-			return 1100;
+			return 1000;
 		case 20:
 			return 2100;
 		case 30:
