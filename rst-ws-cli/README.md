@@ -4,19 +4,15 @@
 
 Group A14
 
-### Lead developer 
+### Lead developer
 
-... ... ...
-
-_preencher com nome, n�mero e GitHub ID de membro do grupo que liderou esta parte e depois apagar esta linha_
+Francisco Sousa 86416 TheMrKiko
 
 ### Contributors
 
-... ... ...
+João Daniel Silva 86445 DannielSilva
 
-... ... ...
-
-_preencher com nome, n�mero e GitHub ID dos membro do grupo que contribuiram com c�digo para esta parte e depois apagar esta linha_
+João Barata 86450 Jbarata
 
 ## About
 
@@ -29,12 +25,11 @@ perform the Java to XML data conversion.
 The client needs access to the WSDL file,
 either using HTTP or using the local file system.
 
-
 ## Instructions for using Maven
 
 You must start jUDDI and server first.
 
-The default WSDL file location is ${basedir}/src/wsdl .
+The default WSDL file location is \${basedir}/src/wsdl .
 The WSDL URL location can be specified in pom.xml
 /project/build/plugins/plugin[artifactId="jaxws-maven-plugin"]/configuration/wsdlUrls
 
@@ -66,5 +61,4 @@ mvn exec:java
 
 Check that the desired POM is selected and 'Finish'.
 
-
-----
+---

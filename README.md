@@ -17,24 +17,20 @@ João Barata 86450 Jbarata98
 For each module, the README file must identify the lead developer and the contributors.
 The leads should be evenly divided among the group members.
 
-
 ### Code identification
 
-In all the source files (including POMs), please replace __A14__ with your Campus: A (Alameda) or T (Tagus); and your group number with two digits.
+In all the source files (including POMs), please replace **A14** with your Campus: A (Alameda) or T (Tagus); and your group number with two digits.
 
-This is important for code dependency management 
+This is important for code dependency management
 i.e. making sure that your code runs using the correct components and not someone else's.
-
 
 ## Getting Started
 
 The overall system is composed of multiple services and clients.
-The main service is the _hub_ service that is aided by the _pts_ service. 
+The main service is the _hub_ service that is aided by the _pts_ service.
 There are also multiple _rst_ services, one for each participating restaurant.
 
 See the project statement for a full description of the domain and the system.
-
-
 
 ### Prerequisites
 
@@ -49,7 +45,6 @@ javac -version
 mvn -version
 ```
 
-
 ### Installing
 
 To compile and install all modules:
@@ -60,17 +55,44 @@ mvn clean install -DskipTests
 
 The tests are skipped because they require each server to be running.
 
+### Executing
+
+Start local jUDDI;
+
+Run one hub instance with:
+
+```
+cd hub-ws/
+mvn exec:java
+```
+
+Run one points instance with:
+
+```
+cd pts-ws/
+mvn exec:java
+```
+
+Run two retaurant instances with:
+
+```
+cd rst-ws/
+mvn exec:java -Dws.i=1
+mvn exec:java -Dws.i=2
+```
+
+To run tests for module _#_, run
+
+```
+cd #-ws-cli/
+mvn verify
+```
 
 ## Built With
 
-* [Maven](https://maven.apache.org/) - Build Tool and Dependency Management
-* [JAX-WS](https://javaee.github.io/metro-jax-ws/) - SOAP Web Services implementation for Java
-
-
+- [Maven](https://maven.apache.org/) - Build Tool and Dependency Management
+- [JAX-WS](https://javaee.github.io/metro-jax-ws/) - SOAP Web Services implementation for Java
 
 ## Versioning
 
-We use [SemVer](http://semver.org/) for versioning. 
-
-
-
+We use [SemVer](http://semver.org/) for versioning.
