@@ -113,6 +113,7 @@ public class HubPortImpl implements HubPortType {
 
 		try {
 			Cart order = Hub.getInstance().orderCart(userId);
+			Hub.getInstance().clearCart(userId);
 			return buildFoodOrder(order);
 		} catch (InvalidUserIdException e) {
 			throwInvalidUserId(e.getMessage());

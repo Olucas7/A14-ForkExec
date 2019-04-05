@@ -114,6 +114,7 @@ public class Hub {
 			for (PointsClient pointsClient : connectToPoints()) {
 				pointsClient.activateUser(userId);
 			}
+			carts.putIfAbsent(userId, new Cart(cartCount++));
 		} catch (EmailAlreadyExistsFault_Exception | InvalidEmailFault_Exception e) {
 			throw new InvalidUserIdException();
 		}
@@ -150,13 +151,13 @@ public class Hub {
 			throws InvalidUserIdException, InvalidCartItemIdException {
 		checkUserId(userId);
 		checkCartItemId(cartItemId);
-		carts.putIfAbsent(userId, new Cart(cartCount++));
 		carts.get(userId).addToCart(new CartItem(cartItemId, itemQuantity));
 	}
 
 	public synchronized void clearCart(String userId) throws InvalidUserIdException {
 		checkUserId(userId);
 		carts.remove(userId);
+		carts.putIfAbsent(userId, new Cart(cartCount++));
 	}
 
 	public synchronized List<CartItem> cartContents(String userId) throws InvalidUserIdException {
