@@ -1,8 +1,11 @@
 package com.forkexec.hub.ws.it;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
+import com.forkexec.hub.ws.*;
 import com.forkexec.hub.ws.cli.HubClient;
 
 import org.junit.AfterClass;
@@ -18,6 +21,7 @@ public class BaseIT {
 
 	protected static HubClient client;
 
+	protected final int INITIAL_BALANCE = 100;
 	protected final String VALID_EMAIL = "joao.barata@tecnico.pt";
 	protected final String NULL_EMAIL = null;
 	protected final String NO_AT_EMAIL = "joao.baratatecnico.pt";
@@ -25,9 +29,15 @@ public class BaseIT {
 	protected final String NO_USER_EMAIL = "@tecnico.pt";
 	protected final String NO_DOMAIN_EMAIL = "velhinho@";
 	protected final String NO_USER_DOMAIN_EMAIL = "@";
-	protected final int INITIAL_BALANCE = 100;
 	protected final String RESTAURANT1 = "A14_Restaurant1";
 	protected final String RESTAURANT2 = "A14_Restaurant2";
+	protected Food food1;
+	protected Food food2;
+	protected FoodId foodId1;
+	protected FoodId foodId2;
+	protected FoodInit foodInit1;
+	protected FoodInit foodInit2;
+	protected List<FoodInit> initialFoods;
 
 	@BeforeClass
 	public static void oneTimeSetup() throws Exception {
@@ -59,6 +69,43 @@ public class BaseIT {
 
 	@AfterClass
 	public static void cleanup() {
+	}
+
+	public void createFoods() {
+		initialFoods = new ArrayList<FoodInit>();
+		foodInit1 = new FoodInit();
+		food1 = new Food();
+		foodId1 = new FoodId();
+		foodInit2 = new FoodInit();
+		food2 = new Food();
+		foodId2 = new FoodId();
+
+		foodId1.setMenuId("1");
+		foodId1.setRestaurantId(RESTAURANT1);
+		foodId2.setMenuId("2");
+		foodId2.setRestaurantId(RESTAURANT2);
+
+		food1.setId(foodId1);
+		food1.setPrice(5);
+		food1.setDessert("mousse_de_chocolate");
+		food1.setEntree("beringela_recheada");
+		food1.setPlate("tofu");
+		food1.setPreparationTime(30);
+
+		food2.setId(foodId2);
+		food2.setPrice(25);
+		food2.setDessert("serradura");
+		food2.setEntree("camarao");
+		food2.setPlate("bitoque_de_tofu");
+		food2.setPreparationTime(10);
+
+		foodInit1.setFood(food1);
+		foodInit1.setQuantity(50);
+		foodInit2.setFood(food2);
+		foodInit2.setQuantity(5);
+
+		initialFoods.add(foodInit1);
+		initialFoods.add(foodInit2);
 	}
 
 }
