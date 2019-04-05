@@ -19,8 +19,21 @@ public class BaseIT {
 
 	protected static PointsClient client;
 
+	protected final String VALID_EMAIL_1 = "joao.barata@tecnico.pt";
+	protected final String VALID_EMAIL_2 = "francisco.sousa@tecnico.pt";
+	protected final String NULL_EMAIL = null;
+	protected final String NO_AT_EMAIL = "joao.baratatecnico.pt";
+	protected final String EMPTY_EMAIL = "";
+	protected final String NO_USER_EMAIL = "@tecnico.pt";
+	protected final String NO_DOMAIN_EMAIL = "velhinho@";
+	protected final String NO_USER_DOMAIN_EMAIL = "@";
+	protected final int STARTPOINTS = 500;
+	protected final int POINTS_TO_SPEND = 400;
+	protected final int POINTS_TO_ADD = 1200;
+
 	@BeforeClass
 	public static void oneTimeSetup() throws Exception {
+
 		testProps = new Properties();
 		try {
 			testProps.load(BaseIT.class.getResourceAsStream(TEST_PROP_FILE));

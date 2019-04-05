@@ -10,41 +10,34 @@ import com.forkexec.pts.ws.InvalidPointsFault_Exception;
 import org.junit.Test;
 
 public class AddPointsIT extends BaseIT {
-    private final String VALID_EMAIL = "joao.barata@tecnico.pt";
-    private final String NULL_EMAIL = null;
-    private final String NO_AT_EMAIL = "joao.baratatecnico.pt";
-    private final String EMPTY_EMAIL = "";
-    private final String NO_USER_EMAIL = "@tecnico.pt";
-    private final String NO_DOMAIN_EMAIL = "velhinho@";
-    private final String NO_USER_DOMAIN_EMAIL = "@";
-    private final int STARTPOINTS = 500;
-    private final int POINTS_TO_ADD = 1200;
 
-    public void success()
-            throws InvalidEmailFault_Exception, InvalidEmailFault_Exception, EmailAlreadyExistsFault_Exception,
-            BadInitFault_Exception, InvalidPointsFault_Exception {
-        
-        client.ctrlInit(STARTPOINTS);
-        
-        client.activateUser(VALID_EMAIL);
-        assertEquals(STARTPOINTS, client.pointsBalance(VALID_EMAIL));
-        
-        client.addPoints(VALID_EMAIL, POINTS_TO_ADD);
-        assertEquals(STARTPOINTS + POINTS_TO_ADD, client.pointsBalance(VALID_EMAIL));
-    }
-    // Testing points -------------------------------------------------------------------------
-    @Test(expected = InvalidPointsFault_Exception.class)
+	public void success() throws InvalidEmailFault_Exception, InvalidEmailFault_Exception,
+			EmailAlreadyExistsFault_Exception, BadInitFault_Exception, InvalidPointsFault_Exception {
+
+		client.ctrlInit(STARTPOINTS);
+
+		client.activateUser(VALID_EMAIL_1);
+		assertEquals(STARTPOINTS, client.pointsBalance(VALID_EMAIL_1));
+
+		client.addPoints(VALID_EMAIL_1, POINTS_TO_ADD);
+		assertEquals(STARTPOINTS + POINTS_TO_ADD, client.pointsBalance(VALID_EMAIL_1));
+	}
+
+	// Testing points
+	// -------------------------------------------------------------------------
+	@Test(expected = InvalidPointsFault_Exception.class)
 	public void add0Points() throws InvalidPointsFault_Exception, InvalidEmailFault_Exception {
-		client.addPoints(VALID_EMAIL, 0);
-    }
-    
-    @Test(expected = InvalidPointsFault_Exception.class)
+		client.addPoints(VALID_EMAIL_1, 0);
+	}
+
+	@Test(expected = InvalidPointsFault_Exception.class)
 	public void addNegativePoints() throws InvalidPointsFault_Exception, InvalidEmailFault_Exception {
-		client.addPoints(VALID_EMAIL, -1);
-    }
-    
-    // Testing emails -------------------------------------------------------------------------
-    @Test(expected = InvalidEmailFault_Exception.class)
+		client.addPoints(VALID_EMAIL_1, -1);
+	}
+
+	// Testing emails
+	// -------------------------------------------------------------------------
+	@Test(expected = InvalidEmailFault_Exception.class)
 	public void nullEmailTest() throws InvalidPointsFault_Exception, InvalidEmailFault_Exception {
 		client.addPoints(NULL_EMAIL, POINTS_TO_ADD);
 	}
@@ -73,8 +66,5 @@ public class AddPointsIT extends BaseIT {
 	public void noAtEmailTest() throws InvalidPointsFault_Exception, InvalidEmailFault_Exception {
 		client.addPoints(NO_AT_EMAIL, POINTS_TO_ADD);
 	}
-
-
-    
 
 }
