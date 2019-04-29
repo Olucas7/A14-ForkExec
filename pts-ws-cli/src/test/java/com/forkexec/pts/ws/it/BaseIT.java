@@ -3,37 +3,27 @@ package com.forkexec.pts.ws.it;
 import java.io.IOException;
 import java.util.Properties;
 
-import com.forkexec.pts.ws.BadInitFault_Exception;
-import com.forkexec.pts.ws.cli.PointsClient;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
+import com.forkexec.pts.ws.cli.PointsClient;
+
 /**
- * Base class for testing a Park Load properties from test.properties
+ * Base class for testing the remote service. Load properties from the
+ * test.properties resource.
  */
 public class BaseIT {
 
+	public static final String UNKNOWN_USER = "Unknown";
+	protected static final int USER_POINTS = 100;
 	private static final String TEST_PROP_FILE = "/test.properties";
 	protected static Properties testProps;
+	protected static final String VALID_USER = "sd.test@tecnico.ulisboa";
 
 	protected static PointsClient client;
 
-	protected final String VALID_EMAIL_1 = "joao.barata@tecnico.pt";
-	protected final String VALID_EMAIL_2 = "francisco.sousa@tecnico.pt";
-	protected final String NULL_EMAIL = null;
-	protected final String NO_AT_EMAIL = "joao.baratatecnico.pt";
-	protected final String EMPTY_EMAIL = "";
-	protected final String NO_USER_EMAIL = "@tecnico.pt";
-	protected final String NO_DOMAIN_EMAIL = "velhinho@";
-	protected final String NO_USER_DOMAIN_EMAIL = "@";
-	protected final int STARTPOINTS = 500;
-	protected final int POINTS_TO_SPEND = 400;
-	protected final int POINTS_TO_ADD = 1200;
-
 	@BeforeClass
 	public static void oneTimeSetup() throws Exception {
-
 		testProps = new Properties();
 		try {
 			testProps.load(BaseIT.class.getResourceAsStream(TEST_PROP_FILE));
@@ -61,7 +51,10 @@ public class BaseIT {
 	}
 
 	@AfterClass
-	public static void cleanup() throws BadInitFault_Exception {
+	public static void cleanup() {
+	}
+
+	protected static void pointsTestClear() {
 		client.ctrlClear();
 	}
 }

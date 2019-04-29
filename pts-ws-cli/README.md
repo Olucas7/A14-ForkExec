@@ -25,11 +25,12 @@ perform the Java to XML data conversion.
 The client needs access to the WSDL file,
 either using HTTP or using the local file system.
 
+
 ## Instructions for using Maven
 
 You must start jUDDI and server first.
 
-The default WSDL file location is \${basedir}/src/wsdl .
+The default WSDL file location is ${basedir}/src/wsdl .
 The WSDL URL location can be specified in pom.xml
 /project/build/plugins/plugin[artifactId="jaxws-maven-plugin"]/configuration/wsdlUrls
 

@@ -1,6 +1,11 @@
 package com.forkexec.pts.ws.it;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import com.forkexec.pts.ws.BadInitFault_Exception;
 import com.forkexec.pts.ws.EmailAlreadyExistsFault_Exception;
@@ -8,73 +13,59 @@ import com.forkexec.pts.ws.InvalidEmailFault_Exception;
 import com.forkexec.pts.ws.InvalidPointsFault_Exception;
 import com.forkexec.pts.ws.NotEnoughBalanceFault_Exception;
 
-import org.junit.Test;
-
 public class SpendPointsIT extends BaseIT {
-    public void success() throws BadInitFault_Exception, EmailAlreadyExistsFault_Exception, InvalidEmailFault_Exception,
-            InvalidPointsFault_Exception, NotEnoughBalanceFault_Exception {
-        client.ctrlInit(STARTPOINTS);
-        client.activateUser(VALID_EMAIL_1);
-        assertEquals(STARTPOINTS, client.pointsBalance(VALID_EMAIL_1));
-        client.spendPoints(VALID_EMAIL_1, POINTS_TO_SPEND);
-        assertEquals(STARTPOINTS - POINTS_TO_SPEND, client.pointsBalance(VALID_EMAIL_1));
-    }
 
-    @Test(expected = InvalidPointsFault_Exception.class)
-    public void spend0Points()
-            throws InvalidEmailFault_Exception, InvalidPointsFault_Exception, NotEnoughBalanceFault_Exception {
-        client.spendPoints(VALID_EMAIL_1, 0);
-    }
+	@Before
+	public void setUp() throws BadInitFault_Exception, EmailAlreadyExistsFault_Exception, InvalidEmailFault_Exception {
+		client.ctrlInit(USER_POINTS);
+		client.activateUser(VALID_USER);
+	}
 
-    @Test(expected = InvalidPointsFault_Exception.class)
-    public void spendNegativePoints()
-            throws InvalidEmailFault_Exception, InvalidPointsFault_Exception, NotEnoughBalanceFault_Exception {
-        client.spendPoints(VALID_EMAIL_1, -1);
-    }
+	@After
+	public void tearDown() {
+		pointsTestClear();
+	}
 
-    @Test(expected = NotEnoughBalanceFault_Exception.class)
-    public void spendTooMuchPoints() throws InvalidEmailFault_Exception, InvalidPointsFault_Exception,
-            NotEnoughBalanceFault_Exception, BadInitFault_Exception, EmailAlreadyExistsFault_Exception {
-        client.ctrlInit(STARTPOINTS);
-        client.activateUser(VALID_EMAIL_2);
-        assertEquals(STARTPOINTS, client.pointsBalance(VALID_EMAIL_2));
-        client.spendPoints(VALID_EMAIL_2, STARTPOINTS + POINTS_TO_SPEND);
-    }
+	@Test
+	public void spendPointsEnoughBalanceTest()
+			throws InvalidEmailFault_Exception, NotEnoughBalanceFault_Exception, InvalidPointsFault_Exception {
+		final int toSpend = USER_POINTS / 10;
+		client.spendPoints(VALID_USER, toSpend);
+		assertEquals(USER_POINTS - toSpend, client.pointsBalance(VALID_USER));
+	}
 
-    @Test(expected = InvalidEmailFault_Exception.class)
-    public void nullEmailTest()
-            throws InvalidEmailFault_Exception, InvalidPointsFault_Exception, NotEnoughBalanceFault_Exception {
-        client.spendPoints(NULL_EMAIL, POINTS_TO_SPEND);
-    }
+	@Test
+	public void spendEntireBalanceTest()
+			throws InvalidEmailFault_Exception, NotEnoughBalanceFault_Exception, InvalidPointsFault_Exception {
+		client.spendPoints(VALID_USER, USER_POINTS);
+		assertEquals(0, client.pointsBalance(VALID_USER));
+	}
 
-    @Test(expected = InvalidEmailFault_Exception.class)
-    public void emptyEmailTest()
-            throws InvalidEmailFault_Exception, InvalidPointsFault_Exception, NotEnoughBalanceFault_Exception {
-        client.spendPoints(EMPTY_EMAIL, POINTS_TO_SPEND);
-    }
+	@Test(expected = InvalidPointsFault_Exception.class)
+	public void spendNoPointsTest()
+			throws InvalidEmailFault_Exception, NotEnoughBalanceFault_Exception, InvalidPointsFault_Exception {
+		client.spendPoints(VALID_USER, 0);
+	}
 
-    @Test(expected = InvalidEmailFault_Exception.class)
-    public void noUserEmailTest()
-            throws InvalidEmailFault_Exception, InvalidPointsFault_Exception, NotEnoughBalanceFault_Exception {
-        client.spendPoints(NO_USER_EMAIL, POINTS_TO_SPEND);
-    }
+	@Test(expected = InvalidEmailFault_Exception.class)
+	public void unknownUserTest()
+			throws InvalidEmailFault_Exception, NotEnoughBalanceFault_Exception, InvalidPointsFault_Exception {
+		client.spendPoints(UNKNOWN_USER, 20);
+	}
 
-    @Test(expected = InvalidEmailFault_Exception.class)
-    public void noDomainEmailTest()
-            throws InvalidEmailFault_Exception, InvalidPointsFault_Exception, NotEnoughBalanceFault_Exception {
-        client.spendPoints(NO_DOMAIN_EMAIL, POINTS_TO_SPEND);
-    }
+	@Test(expected = InvalidEmailFault_Exception.class)
+	public void nullEmailTest()
+			throws InvalidEmailFault_Exception, NotEnoughBalanceFault_Exception, InvalidPointsFault_Exception {
+		client.spendPoints(null, 20);
+	}
 
-    @Test(expected = InvalidEmailFault_Exception.class)
-    public void noUserNorDomainEmailTest()
-            throws InvalidEmailFault_Exception, InvalidPointsFault_Exception, NotEnoughBalanceFault_Exception {
-        client.spendPoints(NO_USER_DOMAIN_EMAIL, POINTS_TO_SPEND);
-    }
-
-    @Test(expected = InvalidEmailFault_Exception.class)
-    public void noAtEmailTest()
-            throws InvalidEmailFault_Exception, InvalidPointsFault_Exception, NotEnoughBalanceFault_Exception {
-        client.spendPoints(NO_AT_EMAIL, POINTS_TO_SPEND);
-    }
-
+	@Test
+	public void notEnoughBalanceTest() throws InvalidPointsFault_Exception, InvalidEmailFault_Exception {
+		try {
+			client.spendPoints(VALID_USER, USER_POINTS + 1);
+			fail();
+		} catch (NotEnoughBalanceFault_Exception e) {
+			assertEquals(USER_POINTS, client.pointsBalance(VALID_USER));
+		}
+	}
 }

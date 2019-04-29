@@ -1,12 +1,14 @@
 package com.forkexec.pts.domain;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 
-import com.forkexec.pts.domain.Exceptions.EmailAlreadyExistsException;
-import com.forkexec.pts.domain.Exceptions.InvalidEmailException;
-import com.forkexec.pts.domain.Exceptions.NotEnoughBalanceException;
+import com.forkexec.pts.domain.exception.EmailAlreadyExistsFaultException;
+import com.forkexec.pts.domain.exception.InvalidEmailFaultException;
+import com.forkexec.pts.domain.exception.InvalidPointsFaultException;
+import com.forkexec.pts.domain.exception.NotEnoughBalanceFaultException;
 
 /**
  * Points
@@ -15,72 +17,147 @@ import com.forkexec.pts.domain.Exceptions.NotEnoughBalanceException;
  */
 public class Points {
 
-    /**
-     * Constant representing the default initial balance for every new client
-     */
-    private static final int DEFAULT_INITIAL_BALANCE = 100;
-    /**
-     * Global with the current value for the initial balance of every new client
-     */
-    private final AtomicInteger initialBalance = new AtomicInteger(DEFAULT_INITIAL_BALANCE);
+	/**
+	 * Constant representing the default initial balance for every new client
+	 */
+	private static final int DEFAULT_INITIAL_BALANCE = 100;
 
-    // database for users and points
-    private static Map<String, AtomicInteger> database = new HashMap<String, AtomicInteger>();
+	/**
+	 * Global with the current value for the initial balance of every new client
+	 */
+	private final AtomicInteger initialBalance = new AtomicInteger(DEFAULT_INITIAL_BALANCE);
 
-    // Singleton -------------------------------------------------------------
+	/**
+	 * Accounts. Associates the user's email with a points balance. The collection
+	 * uses a hash table supporting full concurrency of retrievals and updates. Each
+	 * item is an AtomicInteger, a lock-free thread-safe single variable. This means
+	 * that multiple threads can update this variable concurrently with correct
+	 * synchronization.
+	 */
+	private Map<String, AtomicInteger> accounts = new ConcurrentHashMap<>();
 
-    /**
-     * Private constructor prevents instantiation from other classes.
-     */
-    private Points() {
-    }
+	// Singleton -------------------------------------------------------------
 
-    /**
-     * SingletonHolder is loaded on the first execution of Singleton.getInstance()
-     * or the first access to SingletonHolder.INSTANCE, not before.
-     */
-    private static class SingletonHolder {
-        private static final Points INSTANCE = new Points();
-    }
+	/**
+	 * SingletonHolder is loaded on the first execution of Singleton.getInstance()
+	 * or the first access to SingletonHolder.INSTANCE, not before.
+	 */
+	private static class SingletonHolder {
+		private static final Points INSTANCE = new Points();
+	}
 
-    public static synchronized Points getInstance() {
-        return SingletonHolder.INSTANCE;
-    }
+	/**
+	 * Retrieve single instance of class. Only method where 'synchronized' is used.
+	 */
+	public static synchronized Points getInstance() {
+		return SingletonHolder.INSTANCE;
+	}
 
-    public synchronized void registerEmail(String userEmail) throws EmailAlreadyExistsException {
-        if (database.containsKey(userEmail))
-            throw new EmailAlreadyExistsException();
+	/**
+	 * Private constructor prevents instantiation from other classes.
+	 */
+	private Points() {
+		// initialization with default values
+		reset();
+	}
 
-        database.put(userEmail, initialBalance);
-    }
+	/**
+	 * Reset accounts. Synchronized is not required because we are using concurrent
+	 * map and atomic integer.
+	 */
+	public void reset() {
+		// clear current hash map
+		accounts.clear();
+		// set initial balance to default
+		initialBalance.set(DEFAULT_INITIAL_BALANCE);
+	}
 
-    public synchronized int getBalance(String userEmail) throws InvalidEmailException {
+	/**
+	 * Set initial Reset accounts. Synchronized is not required because we are using
+	 * atomic integer.
+	 */
+	public void setInitialBalance(int newInitialBalance) {
+		initialBalance.set(newInitialBalance);
+	}
 
-        if (!(database.containsKey(userEmail)))
-            throw new InvalidEmailException();
-        AtomicInteger balance = database.get(userEmail);
-        return balance.intValue();
-    }
+	/** Access points for account. Throws exception if it does not exist. */
+	private AtomicInteger getPoints(final String accountId) throws InvalidEmailFaultException {
+		final AtomicInteger points = accounts.get(accountId);
+		if (points == null)
+			throw new InvalidEmailFaultException("Account does not exist!");
+		return points;
+	}
 
-    public synchronized int deltaBalance(String userEmail, int deltaPoints)
-            throws NotEnoughBalanceException, InvalidEmailException {
-        if (!(database.containsKey(userEmail)))
-            throw new InvalidEmailException();
-        int points = database.get(userEmail).addAndGet(deltaPoints);
-        if (points < 0)
-            throw new NotEnoughBalanceException();
+	/**
+	 * Access points for account. Throws exception if email is invalid or account
+	 * does not exist.
+	 */
+	public int getAccountPoints(final String accountId) throws InvalidEmailFaultException {
+		checkValidEmail(accountId);
+		return getPoints(accountId).get();
+	}
 
-        return points;
-    }
+	/** Email address validation. */
+	private void checkValidEmail(final String emailAddress) throws InvalidEmailFaultException {
+		final String message;
+		if (emailAddress == null) {
+			message = "Null email is not valid";
+		} else if (!Pattern.matches("(\\w\\.?)*\\w+@\\w+(\\.?\\w)*", emailAddress)) {
+			message = String.format("Email: %s is not valid", emailAddress);
+		} else {
+			return;
+		}
+		throw new InvalidEmailFaultException(message);
+	}
 
-    public synchronized void reset() {
-        database.clear();
-        initialBalance.set(DEFAULT_INITIAL_BALANCE);
-    }
+	/** Initialize account. */
+	public void initAccount(final String accountId)
+			throws EmailAlreadyExistsFaultException, InvalidEmailFaultException {
+		checkValidEmail(accountId);
+		if (accounts.containsKey(accountId)) {
+			final String message = String.format("Account with email: %s already exists", accountId);
+			throw new EmailAlreadyExistsFaultException(message);
+		}
+		AtomicInteger points = accounts.get(accountId);
+		if (points == null) {
+			points = new AtomicInteger(initialBalance.get());
+			accounts.put(accountId, points);
+		}
+	}
 
-    public synchronized void init(int startPoints) {
-        initialBalance.set(startPoints);
+	/** Add points to account. */
+	public void addPoints(final String accountId, final int pointsToAdd)
+			throws InvalidPointsFaultException, InvalidEmailFaultException {
+		checkValidEmail(accountId);
+		final AtomicInteger points = getPoints(accountId);
+		if (pointsToAdd <= 0) {
+			throw new InvalidPointsFaultException("Value cannot be negative or zero!");
+		}
+		points.addAndGet(pointsToAdd);
+	}
 
-    }
+	/** Remove points from account. */
+	public void removePoints(final String accountId, final int pointsToSpend)
+			throws InvalidEmailFaultException, NotEnoughBalanceFaultException, InvalidPointsFaultException {
+		checkValidEmail(accountId);
+		final AtomicInteger points = getPoints(accountId);
+		if (pointsToSpend <= 0) {
+			throw new InvalidPointsFaultException("Value cannot be negative or zero!");
+		}
+		
+		// use atomic compare and set to make sure that 
+		// between the read and the update the value has not changed.
+		// if it changed, try again
+		int balance, updatedBalance;
+		do {
+			balance = points.get();
+			updatedBalance = balance - pointsToSpend;
+			if (updatedBalance < 0)
+				throw new NotEnoughBalanceFaultException();
+		} while(!points.compareAndSet(/* expected */ balance, updatedBalance));
+				// compareAndSet atomically sets the value to the given updated value 
+				// if the current value == the expected value.
+				// returns true if successful, so we negate to exit loop
+	}
 
 }
