@@ -107,44 +107,56 @@ public class PointsClient {
 				Map<String, Object> requestContext = bindingProvider.getRequestContext();
 				requestContext.put(ENDPOINT_ADDRESS_PROPERTY, wsURL);
 			}
-
+			//TODO calculateMaxTag(buscar a max tag à port)
 			ports.add(port);
 		}
 	}
-
+	
+	private void calculateMaxTag(int currentMaxTag) {
+		//TODO
+		//vê se a currentMaxTag é maior que a global. substitiu
+	}
+	
 	// client methods --------------------------------------------------------------
-
+	
 	public void activateUser(String userEmail) throws EmailAlreadyExistsFault_Exception, InvalidEmailFault_Exception {
+		//TODO
 		//chama o activateUserQ
 	}
-
+	
 	public int pointsBalance(String userEmail) throws InvalidEmailFault_Exception {
+		//TODO
 		//return port.pointsBalance(userEmail);
 	}
 
 	public int addPoints(String userEmail, int pointsToAdd)
-			throws InvalidEmailFault_Exception, InvalidPointsFault_Exception {
+	throws InvalidEmailFault_Exception, InvalidPointsFault_Exception {
+		//TODO
 		//faz logica
 	}
 			
 	public int spendPoints(String userEmail, int pointsToSpend)
-			throws InvalidEmailFault_Exception, InvalidPointsFault_Exception, NotEnoughBalanceFault_Exception {
+	throws InvalidEmailFault_Exception, InvalidPointsFault_Exception, NotEnoughBalanceFault_Exception {
+		//TODO
 		//faz logica
 	}
 
 	// frontend methods -------------------------------------------------------
 
 	private int readPoints(String userEmail) {
+		//TODO
 		//faz o quorum
 		//chama o readPointAsync(tag, userEmail) do server
 	}
-
+	
 	private void writePoints(String userEmail, int balance) {
+		//TODO
 		//faz o quorum
 		//chama o readPointsAsync(tag, userEmail) do server
 	}
-
+	
 	private void writeUser(String userEmail) {
+		//TODO
 		List<Response<WriteUserResponse>> responses = new ArrayList<Response<WriteUserResponse>>();
 		long q = Math.round(ports.size() / 2.0);
 		long r = 0;
@@ -167,14 +179,17 @@ public class PointsClient {
 	// control operations -----------------------------------------------------
 
 	public String ctrlPing(String inputMessage) {
+		//TODO iterar todos
 		return port.ctrlPing(inputMessage);
 	}
-
+	
 	public void ctrlClear() {
+		//TODO iterar todos
 		port.ctrlClear();
 	}
-
+	
 	public void ctrlInit(int startPoints) throws BadInitFault_Exception {
+		//TODO iterar todos
 		port.ctrlInit(startPoints);
 	}
 	
