@@ -112,9 +112,39 @@ public class PointsClient {
 		}
 	}
 
-	// remote invocation methods ----------------------------------------------
+	// client methods --------------------------------------------------------------
 
-	public Response<WriteUserResponse> activateUser(String userEmail) throws EmailAlreadyExistsFault_Exception, InvalidEmailFault_Exception {
+	public void activateUser(String userEmail) throws EmailAlreadyExistsFault_Exception, InvalidEmailFault_Exception {
+		//chama o activateUserQ
+	}
+
+	public int pointsBalance(String userEmail) throws InvalidEmailFault_Exception {
+		//return port.pointsBalance(userEmail);
+	}
+
+	public int addPoints(String userEmail, int pointsToAdd)
+			throws InvalidEmailFault_Exception, InvalidPointsFault_Exception {
+		//faz logica
+	}
+			
+	public int spendPoints(String userEmail, int pointsToSpend)
+			throws InvalidEmailFault_Exception, InvalidPointsFault_Exception, NotEnoughBalanceFault_Exception {
+		//faz logica
+	}
+
+	// frontend methods -------------------------------------------------------
+
+	private int readPoints(String userEmail) {
+		//faz o quorum
+		//chama o readPointAsync(tag, userEmail) do server
+	}
+
+	private void writePoints(String userEmail, int balance) {
+		//faz o quorum
+		//chama o readPointsAsync(tag, userEmail) do server
+	}
+
+	private void writeUser(String userEmail) {
 		List<Response<WriteUserResponse>> responses = new ArrayList<Response<WriteUserResponse>>();
 		long q = Math.round(ports.size() / 2.0);
 		long r = 0;
@@ -132,20 +162,6 @@ public class PointsClient {
 			}
 		}
 		return null;
-	}
-
-	public int pointsBalance(String userEmail) throws InvalidEmailFault_Exception {
-		return port.pointsBalance(userEmail);
-	}
-
-	public int addPoints(String userEmail, int pointsToAdd)
-			throws InvalidEmailFault_Exception, InvalidPointsFault_Exception {
-		return port.addPoints(userEmail, pointsToAdd);
-	}
-
-	public int spendPoints(String userEmail, int pointsToSpend)
-			throws InvalidEmailFault_Exception, InvalidPointsFault_Exception, NotEnoughBalanceFault_Exception {
-		return port.spendPoints(userEmail, pointsToSpend);
 	}
 
 	// control operations -----------------------------------------------------
