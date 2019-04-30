@@ -11,15 +11,13 @@ public class PointsClientApp {
 		// Check arguments.
 		if (args.length == 0) {
 			System.err.println("Argument(s) missing!");
-			System.err.println("Usage: java " + PointsClientApp.class.getName() + " wsURL OR uddiURL wsName");
+			System.err.println("Usage: java " + PointsClientApp.class.getName() + "uddiURL wsName");
 			return;
 		}
 		String uddiURL = null;
 		String wsName = null;
 		String wsURL = null;
-		if (args.length == 1) {
-			wsURL = args[0];
-		} else if (args.length >= 2) {
+		if (args.length >= 2) {
 			uddiURL = args[0];
 			wsName = args[1];
 		}
@@ -27,10 +25,7 @@ public class PointsClientApp {
 		// Create client.
 		PointsClient client = null;
 
-		if (wsURL != null) {
-			System.out.printf("Creating client for server at %s%n", wsURL);
-			client = new PointsClient(wsURL);
-		} else if (uddiURL != null) {
+		if (uddiURL != null) {
 			System.out.printf("Creating client using UDDI at %s for server with name %s%n", uddiURL, wsName);
 			client = new PointsClient(uddiURL, wsName);
 		}
