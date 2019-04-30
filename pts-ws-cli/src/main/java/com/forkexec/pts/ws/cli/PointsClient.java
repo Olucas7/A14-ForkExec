@@ -34,14 +34,14 @@ public class PointsClient implements PointsPortType {
 	private String uddiURL = null;
 
 	/** WS name */
-	private String wsName = null;
+	private String wsNameGlobal = null;
 
 	/** WS end point address */
-	private String wsURL = null; // default value is defined inside WSDL
+	private List<String> wsURLs = null; // default value is defined inside WSDL
 
-	public String getWsURL() {
+	/*public String getWsURL() {
 		return wsURL;
-	}
+	}*/
 
 	/** output option **/
 	private boolean verbose = false;
@@ -54,16 +54,10 @@ public class PointsClient implements PointsPortType {
 		this.verbose = verbose;
 	}
 
-	/** constructor with provided web service URL */
-	public PointsClient(String wsURL) throws PointsClientException {
-		this.wsURL = wsURL;
-		createStub();
-	}
-
 	/** constructor with provided UDDI location and name */
-	public PointsClient(String uddiURL, String wsName) throws PointsClientException {
+	public PointsClient(String uddiURL, String wsNameGlobal) throws PointsClientException {
 		this.uddiURL = uddiURL;
-		this.wsName = wsName;
+		this.wsNameGlobal = wsNameGlobal;
 		uddiLookup();
 		createStub();
 	}
@@ -77,14 +71,14 @@ public class PointsClient implements PointsPortType {
 
 			if (verbose)
 				System.out.printf("Looking for '%s'%n", wsName);
-			wsURL = uddiNaming.lookup(wsName);
+			wsURLs = uddiNaming.list(wsNameGobal+"%");
 
 		} catch (Exception e) {
 			String msg = String.format("Client failed lookup on UDDI at %s!", uddiURL);
 			throw new PointsClientException(msg, e);
 		}
 
-		if (wsURL == null) {
+		if (wsURLs == null) {
 			String msg = String.format("Service with name %s not found on UDDI at %s", wsName, uddiURL);
 			throw new PointsClientException(msg);
 		}
@@ -94,15 +88,21 @@ public class PointsClient implements PointsPortType {
 	private void createStub() {
 		if (verbose)
 			System.out.println("Creating stub ...");
-		service = new PointsService();
-		port = service.getPointsPort();
 
-		if (wsURL != null) {
-			if (verbose)
+		for (String wsURL : wsURLs) {
+
+			PointsService service = new PointsService();
+			PointsPortType port = service.getPointsPort();
+			
+			if (wsURL != null) { 
+				if (verbose)
 				System.out.println("Setting endpoint address ...");
-			BindingProvider bindingProvider = (BindingProvider) port;
-			Map<String, Object> requestContext = bindingProvider.getRequestContext();
-			requestContext.put(ENDPOINT_ADDRESS_PROPERTY, wsURL);
+				BindingProvider bindingProvider = (BindingProvider) port;
+				Map<String, Object> requestContext = bindingProvider.getRequestContext();
+				requestContext.put(ENDPOINT_ADDRESS_PROPERTY, wsURL);
+			}
+
+			ports.put(port);
 		}
 	}
 

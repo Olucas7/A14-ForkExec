@@ -17,14 +17,8 @@
 		<mainclass>com.forkexec.pts.ws.cli.PointsClientApp</mainclass>
 
 		<wsdl.dir>${basedir}/../pts-contract/</wsdl.dir>
-		<!-- instance number -->
-		<ws.i>1</ws.i>
 
-		<ws.host>localhost</ws.host>
-		<ws.port>809${ws.i}</ws.port>
-		<ws.url>http://${ws.host}:${ws.port}/pts-ws/endpoint</ws.url>
-
-		<ws.name>${pts.ws.name}${ws.i}</ws.name>
+		<ws.name>${pts.ws.name}</ws.name>
 	</properties>
 	<dependencies>
 		<!-- JAX-WS -->
