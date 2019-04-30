@@ -7,7 +7,14 @@
   For more information, see sections
   wsdl:service, wsdl:portType, wsdl:types and wsdl:binding below
 -->
-<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://ws.pts.forkexec.com/" xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" xmlns:wsp="http://www.w3.org/ns/ws-policy" xmlns:wsp1_2="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="PointsService" targetNamespace="http://ws.pts.forkexec.com/">
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" 
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+  xmlns:tns="http://ws.pts.forkexec.com/" 
+  xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" 
+  xmlns:wsp="http://www.w3.org/ns/ws-policy" 
+  xmlns:wsp1_2="http://schemas.xmlsoap.org/ws/2004/09/policy" 
+  xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" 
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="PointsService" targetNamespace="http://ws.pts.forkexec.com/">
   <!--  XML Schema Definition (XSD) of data types. -->
   <types>
     <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://ws.pts.forkexec.com/" version="1.0">
@@ -28,6 +35,8 @@
       <xs:element name="ctrlPingResponse" type="tns:ctrlPingResponse" />
       <xs:element name="readPoints" type="tns:readPoints" />
       <xs:element name="readPointsResponse" type="tns:readPointsResponse" />
+      <xs:element name="getMaxTag" type="tns:getMaxTag" />
+      <xs:element name="getMaxTagResponse" type="tns:getMaxTagResponse" />
       <xs:complexType name="ctrlClear">
         <xs:sequence />
       </xs:complexType>
@@ -106,6 +115,14 @@
           <xs:element minOccurs="0" name="message" type="xs:string" />
         </xs:sequence>
       </xs:complexType>
+      <xs:complexType name="getMaxTag">
+        <xs:sequence />
+      </xs:complexType>
+      <xs:complexType name="getMaxTagResponse">
+        <xs:sequence>
+          <xs:element name="return" type="xs:int" />
+        </xs:sequence>
+      </xs:complexType>
     </xs:schema>
   </types>
   <!--  Messages use elements defined in the schema. -->
@@ -160,6 +177,12 @@
   <message name="NotEnoughBalanceFault">
     <part element="tns:NotEnoughBalanceFault" name="fault" />
   </message>
+  <message name="getMaxTag">
+    <part element="tns:getMaxTag" name="parameters" />
+  </message>
+  <message name="getMaxTagResponse">
+    <part element="tns:getMaxTagResponse" name="parameters" />
+  </message>
   <!--  Port type (interface). -->
   <!--  Each operation has input, output and fault messages. -->
   <portType name="PointsPortType">
@@ -193,6 +216,10 @@
       <fault message="tns:InvalidEmailFault" name="InvalidEmailFault" wsam:Action="http://ws.pts.forkexec.com/PointsPortType/writePoints/Fault/InvalidEmailFault" />
       <fault message="tns:InvalidPointsFault" name="InvalidPointsFault" wsam:Action="http://ws.pts.forkexec.com/PointsPortType/writePoints/Fault/InvalidPointsFault" />
       <fault message="tns:NotEnoughBalanceFault" name="NotEnoughBalanceFault" wsam:Action="http://ws.pts.forkexec.com/PointsPortType/writePoints/Fault/NotEnoughBalanceFault" />
+    </operation>
+    <operation name="getMaxTag">
+      <input message="tns:getMaxTag" wsam:Action="http://ws.pts.forkexec.com/PointsPortType/getMaxTagRequest" />
+      <output message="tns:getMaxTagResponse" wsam:Action="http://ws.pts.forkexec.com/PointsPortType/getMaxTagResponse" />
     </operation>
   </portType>
   <!--  Binding defines the actual technologies to use. -->
@@ -272,6 +299,15 @@
       <fault name="NotEnoughBalanceFault">
         <soap:fault name="NotEnoughBalanceFault" use="literal" />
       </fault>
+    </operation>
+    <operation name="getMaxTag">
+      <soap:operation soapAction="" />
+      <input>
+        <soap:body use="literal" />
+      </input>
+      <output>
+        <soap:body use="literal" />
+      </output>
     </operation>
   </binding>
   <!--  Service defines ports. -->
