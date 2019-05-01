@@ -47,6 +47,7 @@
         <xs:sequence>
           <xs:element minOccurs="0" name="userEmail" type="xs:string" />
           <xs:element name="pointsTowrite" type="xs:int" />
+          <xs:element name="tag" type="xs:int" />
         </xs:sequence>
       </xs:complexType>
       <xs:complexType name="writePointsResponse">

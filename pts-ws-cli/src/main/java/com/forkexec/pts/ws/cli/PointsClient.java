@@ -16,6 +16,7 @@ import com.forkexec.pts.ws.InvalidEmailFault_Exception;
 import com.forkexec.pts.ws.InvalidPointsFault_Exception;
 import com.forkexec.pts.ws.NotEnoughBalanceFault_Exception;
 import com.forkexec.pts.ws.ReadPointsResponse;
+import com.forkexec.pts.ws.WritePointsResponse;
 import com.forkexec.pts.ws.WriteUserResponse;
 import com.forkexec.pts.ws.PointsPortType;
 import com.forkexec.pts.ws.PointsService;
@@ -44,6 +45,8 @@ public class PointsClient {
 
 	/** WS end point address */
 	private List<String> wsURLs = null; // default value is defined inside WSDL
+
+	private int maxTag = 0;
 
 	/*
 	 * public String getWsURL() { return wsURL; }
@@ -198,9 +201,44 @@ public class PointsClient {
 	}
 
 	private void writePoints(String userEmail, int balance) {
-		// TODO
-		// faz o quorum
-		// chama o readPointsAsync(tag, userEmail) do server
+		List<Response<WritePointsResponse>> responses = new ArrayList<Response<WritePointsResponse>>();
+		List<Response<WritePointsResponse>> dones = new ArrayList<Response<WritePointsResponse>>();
+		List<Response<WritePointsResponse>> onHold;
+		long q = Math.round(ports.size() / 2.0);
+		long r = 0;
+		maxTag++;
+
+		for (PointsPortType p : ports) {
+			responses.add(p.writePointsAsync(userEmail, balance, maxTag));
+		}
+		while (r < q) {
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				continue;
+			}
+			onHold = new ArrayList<Response<WritePointsResponse>>();
+			for (Response<WritePointsResponse> received : responses) {
+				if (received.isDone()) {
+					r++;
+					dones.add(received);
+
+				} else {
+					onHold.add(received);
+
+				}
+			}
+			responses = onHold;
+		}
+		try {
+			for (Response<WritePointsResponse> done : dones) 
+				done.get();
+		} catch (InterruptedException e) {
+			//TODO;
+		} catch (ExecutionException e) {
+			// TODO
+		}
+
 	}
 
 	private void writeUser(String userEmail) {
