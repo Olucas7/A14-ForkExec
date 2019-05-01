@@ -5,6 +5,7 @@ import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Response;
@@ -44,9 +45,9 @@ public class PointsClient {
 	/** WS end point address */
 	private List<String> wsURLs = null; // default value is defined inside WSDL
 
-	/*public String getWsURL() {
-		return wsURL;
-	}*/
+	/*
+	 * public String getWsURL() { return wsURL; }
+	 */
 
 	/** output option **/
 	private boolean verbose = false;
@@ -99,72 +100,119 @@ public class PointsClient {
 
 			PointsService service = new PointsService();
 			PointsPortType port = service.getPointsPort();
-			
-			if (wsURL != null) { 
+
+			if (wsURL != null) {
 				if (verbose)
-				System.out.println("Setting endpoint address ...");
+					System.out.println("Setting endpoint address ...");
 				BindingProvider bindingProvider = (BindingProvider) port;
 				Map<String, Object> requestContext = bindingProvider.getRequestContext();
 				requestContext.put(ENDPOINT_ADDRESS_PROPERTY, wsURL);
 			}
-			//TODO calculateMaxTag(buscar a max tag à port)
+			// TODO calculateMaxTag(buscar a max tag à port)
 			ports.add(port);
 		}
 	}
-	
+
 	private void calculateMaxTag(int currentMaxTag) {
-		//TODO
-		//vê se a currentMaxTag é maior que a global. substitiu
+		// TODO
+		// vê se a currentMaxTag é maior que a global. substitiu
 	}
-	
+
 	// client methods --------------------------------------------------------------
-	
+
 	public void activateUser(String userEmail) throws EmailAlreadyExistsFault_Exception, InvalidEmailFault_Exception {
-		//TODO
-		//chama o activateUserQ
+		// TODO
+		// chama o activateUserQ
 	}
-	
+
 	public int pointsBalance(String userEmail) throws InvalidEmailFault_Exception {
-		//TODO
-		//return port.pointsBalance(userEmail);
+		// TODO
+		// return port.pointsBalance(userEmail);
 	}
 
 	public int addPoints(String userEmail, int pointsToAdd)
-	throws InvalidEmailFault_Exception, InvalidPointsFault_Exception {
-		//TODO
-		//faz logica
+			throws InvalidEmailFault_Exception, InvalidPointsFault_Exception {
+		// TODO
+		// faz logica
 	}
-			
+
 	public int spendPoints(String userEmail, int pointsToSpend)
-	throws InvalidEmailFault_Exception, InvalidPointsFault_Exception, NotEnoughBalanceFault_Exception {
-		//TODO
-		//faz logica
+			throws InvalidEmailFault_Exception, InvalidPointsFault_Exception, NotEnoughBalanceFault_Exception {
+		// TODO
+		// faz logica
 	}
 
 	// frontend methods -------------------------------------------------------
 
 	private int readPoints(String userEmail) {
-		//TODO
-		//faz o quorum
-		//chama o readPointAsync(tag, userEmail) do server
+		// TODO
+		// faz o quorum
+		// chama o readPointAsync(tag, userEmail) do server
+		List<Response<ReadPointsResponse>> responses = new ArrayList<Response<ReadPointsResponse>>();
+		List<Response<ReadPointsResponse>> dones = new ArrayList<Response<ReadPointsResponse>>();
+		List<Response<ReadPointsResponse>> onHold;
+		long q = Math.round(ports.size() / 2.0);
+		long r = 0;
+
+		for (PointsPortType p : ports) {
+			responses.add(p.readPointsAsync(userEmail));
+		}
+		while (r < q) {
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				continue;
+			}
+			onHold = new ArrayList<Response<ReadPointsResponse>>();
+			for (Response<ReadPointsResponse> received : responses) {
+				if (received.isDone()) {
+					r++;
+					dones.add(received);
+
+				} else {
+					onHold.add(received);
+
+				}
+			}
+			responses = onHold;
+		}
+		int max = 0;
+		int value = 0;
+		for (Response<ReadPointsResponse> done : dones) {
+			int current;
+			try {
+				current = done.get().getTag();
+				if (current > max) {
+					max = current;
+					value = done.get().getPoints();
+				}
+			} catch (InterruptedException e) {
+				continue;
+			} catch (ExecutionException e) {
+
+				// throw new InvalidEmailFault_Exception(message, faultInfo);
+			}
+		}
+		return value;
+
 	}
-	
+
 	private void writePoints(String userEmail, int balance) {
-		//TODO
-		//faz o quorum
-		//chama o readPointsAsync(tag, userEmail) do server
+		// TODO
+		// faz o quorum
+		// chama o readPointsAsync(tag, userEmail) do server
 	}
-	
+
 	private void writeUser(String userEmail) {
-		//TODO
+		// TODO
 		List<Response<WriteUserResponse>> responses = new ArrayList<Response<WriteUserResponse>>();
 		long q = Math.round(ports.size() / 2.0);
 		long r = 0;
-		
+
 		for (PointsPortType p : ports) {
 			responses.add(p.writeUserAsync(userEmail));
 		}
-	
+
 		while (r < q) {
 			for (Response<WriteUserResponse> received : responses) {
 				if (received.isDone()) {
@@ -179,18 +227,18 @@ public class PointsClient {
 	// control operations -----------------------------------------------------
 
 	public String ctrlPing(String inputMessage) {
-		//TODO iterar todos
+		// TODO iterar todos
 		return port.ctrlPing(inputMessage);
 	}
-	
+
 	public void ctrlClear() {
-		//TODO iterar todos
+		// TODO iterar todos
 		port.ctrlClear();
 	}
-	
+
 	public void ctrlInit(int startPoints) throws BadInitFault_Exception {
-		//TODO iterar todos
+		// TODO iterar todos
 		port.ctrlInit(startPoints);
 	}
-	
+
 }
