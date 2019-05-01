@@ -111,21 +111,15 @@ public class PointsClient {
 				Map<String, Object> requestContext = bindingProvider.getRequestContext();
 				requestContext.put(ENDPOINT_ADDRESS_PROPERTY, wsURL);
 			}
-			// TODO calculateMaxTag(buscar a max tag à port)
+			calculateMaxTag(port.getMaxTag());
 			ports.add(port);
 		}
-	}
-
-	private void calculateMaxTag(int currentMaxTag) {
-		// TODO
-		// vê se a currentMaxTag é maior que a global. substitiu
 	}
 
 	// client methods --------------------------------------------------------------
 
 	public void activateUser(String userEmail) throws EmailAlreadyExistsFault_Exception, InvalidEmailFault_Exception {
-		// TODO
-		// chama o activateUserQ
+		readPoints(userEmail);
 	}
 
 	public int pointsBalance(String userEmail) throws InvalidEmailFault_Exception {
@@ -148,9 +142,6 @@ public class PointsClient {
 	// frontend methods -------------------------------------------------------
 
 	private int readPoints(String userEmail) {
-		// TODO
-		// faz o quorum
-		// chama o readPointAsync(tag, userEmail) do server
 		List<Response<ReadPointsResponse>> responses = new ArrayList<Response<ReadPointsResponse>>();
 		List<Response<ReadPointsResponse>> dones = new ArrayList<Response<ReadPointsResponse>>();
 		List<Response<ReadPointsResponse>> onHold;
@@ -171,10 +162,8 @@ public class PointsClient {
 				if (received.isDone()) {
 					r++;
 					dones.add(received);
-
 				} else {
 					onHold.add(received);
-
 				}
 			}
 			responses = onHold;
@@ -192,12 +181,10 @@ public class PointsClient {
 			} catch (InterruptedException e) {
 				continue;
 			} catch (ExecutionException e) {
-
 				// throw new InvalidEmailFault_Exception(message, faultInfo);
 			}
 		}
 		return value;
-
 	}
 
 	private void writePoints(String userEmail, int balance) {
@@ -211,6 +198,7 @@ public class PointsClient {
 		for (PointsPortType p : ports) {
 			responses.add(p.writePointsAsync(userEmail, balance, maxTag));
 		}
+
 		while (r < q) {
 			try {
 				Thread.sleep(10);
@@ -231,52 +219,38 @@ public class PointsClient {
 			responses = onHold;
 		}
 		try {
-			for (Response<WritePointsResponse> done : dones) 
+			for (Response<WritePointsResponse> done : dones)
 				done.get();
 		} catch (InterruptedException e) {
-			//TODO;
+			// TODO;
 		} catch (ExecutionException e) {
 			// TODO
 		}
-
-	}
-
-	private void writeUser(String userEmail) {
-		// TODO
-		List<Response<WriteUserResponse>> responses = new ArrayList<Response<WriteUserResponse>>();
-		long q = Math.round(ports.size() / 2.0);
-		long r = 0;
-
-		for (PointsPortType p : ports) {
-			responses.add(p.writeUserAsync(userEmail));
-		}
-
-		while (r < q) {
-			for (Response<WriteUserResponse> received : responses) {
-				if (received.isDone()) {
-					r++;
-					responses.remove(received);
-				}
-			}
-		}
-		return null;
 	}
 
 	// control operations -----------------------------------------------------
 
 	public String ctrlPing(String inputMessage) {
-		// TODO iterar todos
-		return port.ctrlPing(inputMessage);
+		String message = "";
+		for (PointsPortType p : ports) {
+			message += p.ctrlPing(inputMessage) + "\n";
+		}
+		return message;
 	}
 
 	public void ctrlClear() {
-		// TODO iterar todos
-		port.ctrlClear();
+		for (PointsPortType p : ports)
+			p.ctrlClear();
 	}
 
 	public void ctrlInit(int startPoints) throws BadInitFault_Exception {
-		// TODO iterar todos
-		port.ctrlInit(startPoints);
+		for (PointsPortType p : ports)
+			p.ctrlInit(startPoints);
+	}
+
+	private void calculateMaxTag(int currentMaxTag) {
+		if (currentMaxTag > maxTag)
+			maxTag = currentMaxTag;
 	}
 
 }

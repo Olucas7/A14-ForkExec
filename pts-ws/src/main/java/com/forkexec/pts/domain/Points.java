@@ -115,21 +115,6 @@ public class Points {
 		throw new InvalidEmailFaultException(message);
 	}
 	
-	/** Initialize account. */
-	public void initAccount(final String accountId)
-	throws EmailAlreadyExistsFaultException, InvalidEmailFaultException {
-		/*checkValidEmail(accountId);
-		if (accounts.containsKey(accountId)) {
-			final String message = String.format("Account with email: %s already exists", accountId);
-			throw new EmailAlreadyExistsFaultException(message);
-		}
-		AtomicInteger points = accounts.get(accountId).getPoints();
-		if (points == null) {
-			points = new AtomicInteger(initialBalance.get());
-			accounts.put(accountId, new Value(points));
-		}*/
-	}
-	
 	/** Set points to account. */
 	public void setPoints(final String accountId, final Value info)
 	throws InvalidPointsFaultException, InvalidEmailFaultException {
@@ -147,9 +132,8 @@ public class Points {
 	}
 
 	private void calculateMaxTag(int tag) {
-		if (tag > maxTag) {
+		if (tag > maxTag)
 			maxTag = tag;
-		}
 	}
 	
 }

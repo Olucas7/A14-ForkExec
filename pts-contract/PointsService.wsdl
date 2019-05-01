@@ -23,8 +23,6 @@
       <xs:element name="InvalidEmailFault" type="tns:InvalidEmailFault" />
       <xs:element name="InvalidPointsFault" type="tns:InvalidPointsFault" />
       <xs:element name="NotEnoughBalanceFault" type="tns:NotEnoughBalanceFault" />
-      <xs:element name="writeUser" type="tns:writeUser" />
-      <xs:element name="writeUserResponse" type="tns:writeUserResponse" />
       <xs:element name="writePoints" type="tns:writePoints" />
       <xs:element name="writePointsResponse" type="tns:writePointsResponse" />
       <xs:element name="ctrlClear" type="tns:ctrlClear" />
@@ -69,14 +67,6 @@
         <xs:sequence>
           <xs:element minOccurs="0" name="message" type="xs:string" />
         </xs:sequence>
-      </xs:complexType>
-      <xs:complexType name="writeUser">
-        <xs:sequence>
-          <xs:element minOccurs="0" name="userEmail" type="xs:string" />
-        </xs:sequence>
-      </xs:complexType>
-      <xs:complexType name="writeUserResponse">
-        <xs:sequence />
       </xs:complexType>
       <xs:complexType name="EmailAlreadyExistsFault">
         <xs:sequence>
@@ -143,12 +133,6 @@
   <message name="InvalidEmailFault">
     <part element="tns:InvalidEmailFault" name="fault" />
   </message>
-  <message name="writeUser">
-    <part element="tns:writeUser" name="parameters" />
-  </message>
-  <message name="writeUserResponse">
-    <part element="tns:writeUserResponse" name="parameters" />
-  </message>
   <message name="EmailAlreadyExistsFault">
     <part element="tns:EmailAlreadyExistsFault" name="fault" />
   </message>
@@ -197,12 +181,6 @@
       <output message="tns:readPointsResponse" wsam:Action="http://ws.pts.forkexec.com/PointsPortType/readPointsResponse" />
       <fault message="tns:InvalidEmailFault" name="InvalidEmailFault" wsam:Action="http://ws.pts.forkexec.com/PointsPortType/readPoints/Fault/InvalidEmailFault" />
     </operation>
-    <operation name="writeUser">
-      <input message="tns:writeUser" wsam:Action="http://ws.pts.forkexec.com/PointsPortType/writeUserRequest" />
-      <output message="tns:writeUserResponse" wsam:Action="http://ws.pts.forkexec.com/PointsPortType/writeUserResponse" />
-      <fault message="tns:InvalidEmailFault" name="InvalidEmailFault" wsam:Action="http://ws.pts.forkexec.com/PointsPortType/writeUser/Fault/InvalidEmailFault" />
-      <fault message="tns:EmailAlreadyExistsFault" name="EmailAlreadyExistsFault" wsam:Action="http://ws.pts.forkexec.com/PointsPortType/writeUser/Fault/EmailAlreadyExistsFault" />
-    </operation>
     <operation name="ctrlInit">
       <input message="tns:ctrlInit" wsam:Action="http://ws.pts.forkexec.com/PointsPortType/ctrlInitRequest" />
       <output message="tns:ctrlInitResponse" wsam:Action="http://ws.pts.forkexec.com/PointsPortType/ctrlInitResponse" />
@@ -246,21 +224,6 @@
       </output>
       <fault name="InvalidEmailFault">
         <soap:fault name="InvalidEmailFault" use="literal" />
-      </fault>
-    </operation>
-    <operation name="writeUser">
-      <soap:operation soapAction="" />
-      <input>
-        <soap:body use="literal" />
-      </input>
-      <output>
-        <soap:body use="literal" />
-      </output>
-      <fault name="InvalidEmailFault">
-        <soap:fault name="InvalidEmailFault" use="literal" />
-      </fault>
-      <fault name="EmailAlreadyExistsFault">
-        <soap:fault name="EmailAlreadyExistsFault" use="literal" />
       </fault>
     </operation>
     <operation name="ctrlInit">
