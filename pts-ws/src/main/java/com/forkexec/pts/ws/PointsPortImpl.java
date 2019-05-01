@@ -1,8 +1,12 @@
 package com.forkexec.pts.ws;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import javax.jws.WebService;
+import javax.xml.ws.Holder;
 
 import com.forkexec.pts.domain.Points;
+import com.forkexec.pts.domain.Value;
 import com.forkexec.pts.domain.exception.EmailAlreadyExistsFaultException;
 import com.forkexec.pts.domain.exception.InvalidEmailFaultException;
 import com.forkexec.pts.domain.exception.InvalidPointsFaultException;
@@ -12,13 +16,7 @@ import com.forkexec.pts.domain.exception.NotEnoughBalanceFaultException;
  * This class implements the Web Service port type (interface). The annotations
  * below "map" the Java class to the WSDL definitions.
  */
-@WebService(
-		endpointInterface = "com.forkexec.pts.ws.PointsPortType", 
-		wsdlLocation = "PointsService.wsdl", 
-		name = "PointsWebService", 
-		portName = "PointsPort", 
-		targetNamespace = "http://ws.pts.forkexec.com/", 
-		serviceName = "PointsService")
+@WebService(endpointInterface = "com.forkexec.pts.ws.PointsPortType", wsdlLocation = "PointsService.wsdl", name = "PointsWebService", portName = "PointsPort", targetNamespace = "http://ws.pts.forkexec.com/", serviceName = "PointsService")
 public class PointsPortImpl implements PointsPortType {
 
 	/**
@@ -35,7 +33,7 @@ public class PointsPortImpl implements PointsPortType {
 	// Main operations -------------------------------------------------------
 
 	@Override
-	public void activateUser(final String userEmail)
+	public void writeUser(final String userEmail)
 			throws EmailAlreadyExistsFault_Exception, InvalidEmailFault_Exception {
 		try {
 			final Points points = Points.getInstance();
@@ -50,46 +48,37 @@ public class PointsPortImpl implements PointsPortType {
 	}
 
 	@Override
-	public int pointsBalance(final String userEmail) throws InvalidEmailFault_Exception {
+	public void readPoints(final String userEmail, Holder<Integer> pointsHolder, Holder<Integer> tagHolder)
+			throws InvalidEmailFault_Exception {
 		try {
 			final Points points = Points.getInstance();
-			return points.getAccountPoints(userEmail);
+			final Value info = points.getAccountPoints(userEmail);
+			pointsHolder.value = info.getPoints().get();
+			tagHolder.value = info.getTag();
 		} catch (InvalidEmailFaultException e) {
 			throwInvalidEmailFault(e.getMessage());
-			return -1;
 		}
 	}
 
 	@Override
-	public int addPoints(final String userEmail, final int pointsToAdd)
+	public int writePoints(final String userEmail, final int newpoints, final int tag)
 			throws InvalidEmailFault_Exception, InvalidPointsFault_Exception {
 		try {
+			final Value info = new Value(new AtomicInteger(newpoints), tag);
 			final Points points = Points.getInstance();
-			points.addPoints(userEmail, pointsToAdd);
-			return points.getAccountPoints(userEmail);
+			points.setPoints(userEmail, info);
 		} catch (InvalidEmailFaultException e) {
 			throwInvalidEmailFault(e.getMessage());
 		} catch (InvalidPointsFaultException e) {
 			throwInvalidPointsFault(e.getMessage());
 		}
-		return -1;
+		return newpoints;
 	}
 
 	@Override
-	public int spendPoints(final String userEmail, final int pointsToSpend)
-			throws InvalidEmailFault_Exception, InvalidPointsFault_Exception, NotEnoughBalanceFault_Exception {
-		try {
-			final Points points = Points.getInstance();
-			points.removePoints(userEmail, pointsToSpend);
-			return points.getAccountPoints(userEmail);
-		} catch (InvalidEmailFaultException e) {
-			throwInvalidEmailFault(e.getMessage());
-		} catch (InvalidPointsFaultException e) {
-			throwInvalidPointsFault(e.getMessage());
-		} catch (NotEnoughBalanceFaultException e) {
-			throwNotEnoughBalanceFault(e.getMessage());
-		}
-		return -1;
+	public int getMaxTag() {
+		Points points = Points.getInstance();
+		return points.getMaxTag();
 	}
 
 	// Control operations ----------------------------------------------------
@@ -161,4 +150,5 @@ public class PointsPortImpl implements PointsPortType {
 		throw new InvalidPointsFault_Exception(message, faultInfo);
 	}
 
+	
 }

@@ -34,7 +34,9 @@ public class Points {
 	 * that multiple threads can update this variable concurrently with correct
 	 * synchronization.
 	 */
-	private Map<String, AtomicInteger> accounts = new ConcurrentHashMap<>();
+	private Map<String, Value> accounts = new ConcurrentHashMap<>();
+
+	private int maxTag = 0;
 
 	// Singleton -------------------------------------------------------------
 
@@ -81,20 +83,23 @@ public class Points {
 	}
 
 	/** Access points for account. Throws exception if it does not exist. */
-	private AtomicInteger getPoints(final String accountId) throws InvalidEmailFaultException {
-		final AtomicInteger points = accounts.get(accountId);
-		if (points == null)
-			throw new InvalidEmailFaultException("Account does not exist!");
-		return points;
+	private Value getPoints(final String accountId) {
+		Value info = accounts.get(accountId);
+		if (info == null)
+			//throw new InvalidEmailFaultException("Account does not exist!");
+			info = new Value(initialBalance, 0);
+			accounts.put(accountId, info); //if not exists, creates new account
+			calculateMaxTag(info.getTag());
+		return info;
 	}
 
 	/**
 	 * Access points for account. Throws exception if email is invalid or account
 	 * does not exist.
 	 */
-	public int getAccountPoints(final String accountId) throws InvalidEmailFaultException {
+	public Value getAccountPoints(final String accountId) throws InvalidEmailFaultException {
 		checkValidEmail(accountId);
-		return getPoints(accountId).get();
+		return getPoints(accountId);
 	}
 
 	/** Email address validation. */
@@ -109,55 +114,42 @@ public class Points {
 		}
 		throw new InvalidEmailFaultException(message);
 	}
-
+	
 	/** Initialize account. */
 	public void initAccount(final String accountId)
-			throws EmailAlreadyExistsFaultException, InvalidEmailFaultException {
-		checkValidEmail(accountId);
+	throws EmailAlreadyExistsFaultException, InvalidEmailFaultException {
+		/*checkValidEmail(accountId);
 		if (accounts.containsKey(accountId)) {
 			final String message = String.format("Account with email: %s already exists", accountId);
 			throw new EmailAlreadyExistsFaultException(message);
 		}
-		AtomicInteger points = accounts.get(accountId);
+		AtomicInteger points = accounts.get(accountId).getPoints();
 		if (points == null) {
 			points = new AtomicInteger(initialBalance.get());
-			accounts.put(accountId, points);
-		}
+			accounts.put(accountId, new Value(points));
+		}*/
 	}
-
-	/** Add points to account. */
-	public void addPoints(final String accountId, final int pointsToAdd)
-			throws InvalidPointsFaultException, InvalidEmailFaultException {
+	
+	/** Set points to account. */
+	public void setPoints(final String accountId, final Value info)
+	throws InvalidPointsFaultException, InvalidEmailFaultException {
 		checkValidEmail(accountId);
-		final AtomicInteger points = getPoints(accountId);
-		if (pointsToAdd <= 0) {
+		final AtomicInteger points = info.getPoints();
+		if (points.get() <= 0) {
 			throw new InvalidPointsFaultException("Value cannot be negative or zero!");
 		}
-		points.addAndGet(pointsToAdd);
+		accounts.put(accountId, info);
+		calculateMaxTag(info.getTag());
+	}
+	
+	public int getMaxTag() {
+		return maxTag;
 	}
 
-	/** Remove points from account. */
-	public void removePoints(final String accountId, final int pointsToSpend)
-			throws InvalidEmailFaultException, NotEnoughBalanceFaultException, InvalidPointsFaultException {
-		checkValidEmail(accountId);
-		final AtomicInteger points = getPoints(accountId);
-		if (pointsToSpend <= 0) {
-			throw new InvalidPointsFaultException("Value cannot be negative or zero!");
+	private void calculateMaxTag(int tag) {
+		if (tag > maxTag) {
+			maxTag = tag;
 		}
-		
-		// use atomic compare and set to make sure that 
-		// between the read and the update the value has not changed.
-		// if it changed, try again
-		int balance, updatedBalance;
-		do {
-			balance = points.get();
-			updatedBalance = balance - pointsToSpend;
-			if (updatedBalance < 0)
-				throw new NotEnoughBalanceFaultException();
-		} while(!points.compareAndSet(/* expected */ balance, updatedBalance));
-				// compareAndSet atomically sets the value to the given updated value 
-				// if the current value == the expected value.
-				// returns true if successful, so we negate to exit loop
 	}
-
+	
 }
