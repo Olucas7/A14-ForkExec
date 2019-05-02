@@ -7,12 +7,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.forkexec.pts.ws.BadInitFault_Exception;
-import com.forkexec.pts.ws.EmailAlreadyExistsFault_Exception;
 import com.forkexec.pts.ws.InvalidEmailFault_Exception;
 
 public class PointsBalanceIT extends BaseIT {
 	@Before
-	public void setUp() throws EmailAlreadyExistsFault_Exception, InvalidEmailFault_Exception, BadInitFault_Exception {
+	public void setUp() throws InvalidEmailFault_Exception, BadInitFault_Exception {
 		client.ctrlInit(USER_POINTS);
 		client.activateUser(VALID_USER);
 	}

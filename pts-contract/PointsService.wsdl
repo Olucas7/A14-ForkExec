@@ -19,7 +19,6 @@
   <types>
     <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://ws.pts.forkexec.com/" version="1.0">
       <xs:element name="BadInitFault" type="tns:BadInitFault" />
-      <xs:element name="EmailAlreadyExistsFault" type="tns:EmailAlreadyExistsFault" />
       <xs:element name="InvalidEmailFault" type="tns:InvalidEmailFault" />
       <xs:element name="InvalidPointsFault" type="tns:InvalidPointsFault" />
       <xs:element name="NotEnoughBalanceFault" type="tns:NotEnoughBalanceFault" />
@@ -64,11 +63,6 @@
         </xs:sequence>
       </xs:complexType>
       <xs:complexType name="NotEnoughBalanceFault">
-        <xs:sequence>
-          <xs:element minOccurs="0" name="message" type="xs:string" />
-        </xs:sequence>
-      </xs:complexType>
-      <xs:complexType name="EmailAlreadyExistsFault">
         <xs:sequence>
           <xs:element minOccurs="0" name="message" type="xs:string" />
         </xs:sequence>
@@ -132,9 +126,6 @@
   </message>
   <message name="InvalidEmailFault">
     <part element="tns:InvalidEmailFault" name="fault" />
-  </message>
-  <message name="EmailAlreadyExistsFault">
-    <part element="tns:EmailAlreadyExistsFault" name="fault" />
   </message>
   <message name="ctrlInit">
     <part element="tns:ctrlInit" name="parameters" />

@@ -8,13 +8,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.forkexec.pts.ws.BadInitFault_Exception;
-import com.forkexec.pts.ws.EmailAlreadyExistsFault_Exception;
 import com.forkexec.pts.ws.InvalidEmailFault_Exception;
 import com.forkexec.pts.ws.InvalidPointsFault_Exception;
 
 public class AddPointsIT extends BaseIT {
 	@Before
-	public void setUp() throws BadInitFault_Exception, EmailAlreadyExistsFault_Exception, InvalidEmailFault_Exception {
+	public void setUp() throws BadInitFault_Exception, InvalidEmailFault_Exception {
 		client.ctrlInit(USER_POINTS);
 		client.activateUser(VALID_USER);
 	}
