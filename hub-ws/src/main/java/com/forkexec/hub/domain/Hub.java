@@ -13,7 +13,6 @@ import com.forkexec.hub.domain.exceptions.InvalidCartItemIdException;
 import com.forkexec.hub.domain.exceptions.InvalidPointsException;
 import com.forkexec.hub.domain.exceptions.InvalidTextException;
 import com.forkexec.hub.domain.exceptions.InvalidUserIdException;
-import com.forkexec.pts.ws.EmailAlreadyExistsFault_Exception;
 import com.forkexec.pts.ws.InvalidEmailFault_Exception;
 import com.forkexec.pts.ws.InvalidPointsFault_Exception;
 import com.forkexec.pts.ws.NotEnoughBalanceFault_Exception;
@@ -74,10 +73,8 @@ public class Hub {
 
 	public synchronized void chargeAccount(String userId, int moneyToAdd, String creditCardNumber)
 			throws InvalidUserIdException, InvalidPointsException, InvalidCardNumberException {
-		System.out.println("USER ID AINDA N PASSOU " + userId);
 
 		checkUserId(userId);
-		System.out.println("USER ID PASSOU " + userId);
 		CreditCardClient creditCard = connectToCreditCard();
 		if (!(creditCard.validateNumber(creditCardNumber)))
 			throw new InvalidCardNumberException();
@@ -115,7 +112,7 @@ public class Hub {
 				pointsClient.activateUser(userId);
 			}
 			carts.putIfAbsent(userId, new Cart(cartCount++));
-		} catch (EmailAlreadyExistsFault_Exception | InvalidEmailFault_Exception e) {
+		} catch (InvalidEmailFault_Exception e) {
 			throw new InvalidUserIdException();
 		}
 	}
@@ -309,13 +306,12 @@ public class Hub {
 		List<PointsClient> points = new ArrayList<PointsClient>();
 
 		try {
-			for (UDDIRecord p : uddi.listRecords("A14_Points%")) {
-				PointsClient point = new PointsClient(p.getUrl(), p.getOrgName());
-				points.add(point);
-			}
+			PointsClient point = new PointsClient(uddi.getUDDIUrl(), "A14_Points");
+			points.add(point);
+			if (points.isEmpty())
+				throw new RuntimeException();
 			return points;
-
-		} catch (UDDINamingException | PointsClientException e) {
+		} catch (PointsClientException e) {
 			throw new RuntimeException(e);
 		}
 	}

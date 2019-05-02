@@ -5,10 +5,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
-import com.forkexec.pts.domain.exception.EmailAlreadyExistsFaultException;
 import com.forkexec.pts.domain.exception.InvalidEmailFaultException;
 import com.forkexec.pts.domain.exception.InvalidPointsFaultException;
-import com.forkexec.pts.domain.exception.NotEnoughBalanceFaultException;
 
 /**
  * Points
@@ -85,11 +83,12 @@ public class Points {
 	/** Access points for account. Throws exception if it does not exist. */
 	private Value getPoints(final String accountId) {
 		Value info = accounts.get(accountId);
-		if (info == null)
+		if (info == null) {
 			//throw new InvalidEmailFaultException("Account does not exist!");
 			info = new Value(initialBalance, 0);
 			accounts.put(accountId, info); //if not exists, creates new account
 			calculateMaxTag(info.getTag());
+		}
 		return info;
 	}
 

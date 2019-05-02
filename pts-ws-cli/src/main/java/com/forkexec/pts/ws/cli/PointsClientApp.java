@@ -16,7 +16,6 @@ public class PointsClientApp {
 		}
 		String uddiURL = null;
 		String wsName = null;
-		String wsURL = null;
 		if (args.length >= 2) {
 			uddiURL = args[0];
 			wsName = args[1];

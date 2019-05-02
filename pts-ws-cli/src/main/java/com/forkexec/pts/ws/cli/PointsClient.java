@@ -173,7 +173,7 @@ public class PointsClient {
 			}
 			responses = onHold;
 		}
-		int max = 0;
+		int max = -1;
 		int value = 0;
 		for (Response<ReadPointsResponse> done : dones) {
 			int current;
