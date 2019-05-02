@@ -11,13 +11,12 @@ import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Response;
 
 import com.forkexec.pts.ws.BadInitFault_Exception;
-import com.forkexec.pts.ws.EmailAlreadyExistsFault_Exception;
 import com.forkexec.pts.ws.InvalidEmailFault_Exception;
+import com.forkexec.pts.ws.InvalidPointsFault;
 import com.forkexec.pts.ws.InvalidPointsFault_Exception;
 import com.forkexec.pts.ws.NotEnoughBalanceFault_Exception;
 import com.forkexec.pts.ws.ReadPointsResponse;
 import com.forkexec.pts.ws.WritePointsResponse;
-import com.forkexec.pts.ws.WriteUserResponse;
 import com.forkexec.pts.ws.PointsPortType;
 import com.forkexec.pts.ws.PointsService;
 
@@ -118,25 +117,31 @@ public class PointsClient {
 
 	// client methods --------------------------------------------------------------
 
-	public void activateUser(String userEmail) throws EmailAlreadyExistsFault_Exception, InvalidEmailFault_Exception {
+	public void activateUser(String userEmail) throws InvalidEmailFault_Exception {
 		readPoints(userEmail);
 	}
 
 	public int pointsBalance(String userEmail) throws InvalidEmailFault_Exception {
-		// TODO
-		// return port.pointsBalance(userEmail);
+		return readPoints(userEmail);
 	}
 
 	public int addPoints(String userEmail, int pointsToAdd)
 			throws InvalidEmailFault_Exception, InvalidPointsFault_Exception {
-		// TODO
-		// faz logica
+		int points = readPoints(userEmail) + pointsToAdd;
+		if (points < 0)
+			throwInvalidPointsFault("points cannot be negative");
+		writePoints(userEmail, points);
+		return points;
+
 	}
 
 	public int spendPoints(String userEmail, int pointsToSpend)
 			throws InvalidEmailFault_Exception, InvalidPointsFault_Exception, NotEnoughBalanceFault_Exception {
-		// TODO
-		// faz logica
+		int points = readPoints(userEmail) - pointsToSpend;
+		if (points < 0)
+			throwInvalidPointsFault("points cannot be negative");
+		writePoints(userEmail, points);
+		return points;
 	}
 
 	// frontend methods -------------------------------------------------------
@@ -181,7 +186,7 @@ public class PointsClient {
 			} catch (InterruptedException e) {
 				continue;
 			} catch (ExecutionException e) {
-				// throw new InvalidEmailFault_Exception(message, faultInfo);
+				//throw new InvalidEmailFault_Exception(message, faultInfo);
 			}
 		}
 		return value;
@@ -251,6 +256,14 @@ public class PointsClient {
 	private void calculateMaxTag(int currentMaxTag) {
 		if (currentMaxTag > maxTag)
 			maxTag = currentMaxTag;
+	}
+
+	// Exception Helper
+	// --------------------------------------------------------------
+	private void throwInvalidPointsFault(final String message) throws InvalidPointsFault_Exception {
+		final InvalidPointsFault faultInfo = new InvalidPointsFault();
+		faultInfo.setMessage(message);
+		throw new InvalidPointsFault_Exception(message, faultInfo);
 	}
 
 }

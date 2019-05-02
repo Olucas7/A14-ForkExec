@@ -120,8 +120,8 @@ public class Points {
 	throws InvalidPointsFaultException, InvalidEmailFaultException {
 		checkValidEmail(accountId);
 		final AtomicInteger points = info.getPoints();
-		if (points.get() <= 0) {
-			throw new InvalidPointsFaultException("Value cannot be negative or zero!");
+		if (points.get() < 0) {
+			throw new InvalidPointsFaultException("Value cannot be negative!");
 		}
 		accounts.put(accountId, info);
 		calculateMaxTag(info.getTag());
