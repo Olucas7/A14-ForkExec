@@ -42,6 +42,28 @@ public class HubClientApp {
 		String result = client.ctrlPing("client");
 		System.out.print("Result: ");
 		System.out.println(result);
+
+		System.in.read();
+		
+		String user = "jbf@gmail.com";
+		System.out.println("Activating user %s" + user);
+		client.activateAccount(user);
+		System.out.println("Activated");
+		System.in.read();
+
+		System.out.println("Geting balance");
+		int points = client.accountBalance(user);
+		System.out.println("User " + user + " has " + points + " points");
+		System.in.read();
+
+		System.out.println("Adding balance 10");
+		client.loadAccount(user, 10, "4024007102923926");
+		System.out.println("Added");
+		System.in.read();
+
+		System.out.println("Geting balance");
+		points = client.accountBalance(user);
+		System.out.println("User " + user + " has " + points + " points");
 	}
 
 }

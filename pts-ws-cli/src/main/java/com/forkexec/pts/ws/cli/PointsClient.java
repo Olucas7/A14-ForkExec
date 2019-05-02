@@ -186,7 +186,7 @@ public class PointsClient {
 			} catch (InterruptedException e) {
 				continue;
 			} catch (ExecutionException e) {
-				//throw new InvalidEmailFault_Exception(message, faultInfo);
+				System.out.println(e.getCause());
 			}
 		}
 		return value;
@@ -226,10 +226,8 @@ public class PointsClient {
 		try {
 			for (Response<WritePointsResponse> done : dones)
 				done.get();
-		} catch (InterruptedException e) {
-			// TODO;
-		} catch (ExecutionException e) {
-			// TODO
+		} catch (InterruptedException | ExecutionException e) {
+			System.out.println(e.getCause());
 		}
 	}
 
