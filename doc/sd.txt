@@ -1,0 +1,35 @@
+Modelo de faltas:
+Quais as faltas que vão ser recuperadas
+Quais as faltas que não vão ser toleradas
+silenciosas vs arbitrarias
+
+A fazer:
+mudar o wsdl e adicionar [points, tag] = readPoints(userID); ack = writePoints(userID, points);
+deixar de implementar pointportimpls no pointsclient
+
+
+Solução:
+
+LEITURA
+fronted:
+- enviar read para todos, no máximo 1 vez
+- aguarda por Q respostas
+- retorna a tag de maior valor
+replica:
+- recebe chamada
+- responde [points, tag]
+
+
+ESCRITA
+fronted:
+- criar newtag = newtag+1
+- chama writes das replicas a todos
+- esperar por Q acks
+replica:
+- ao receber, verifica se a tag é maior que a tag para esse valor
+- se for, substitui
+- responde acks
+
+Otimizações:
+Só utilizamos um cliente, nao usamos cid
+so temos um fronted, nao lemos maxtag na escrita
